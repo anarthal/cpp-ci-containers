@@ -16,6 +16,7 @@ target "build-ubuntu22" {
     matrix = {
         "tgt" = [
             "build-gcc11",
+            "build-clang14",
         ]
     }
     dockerfile = "images/build-ubuntu22.dockerfile"
