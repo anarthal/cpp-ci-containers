@@ -5,13 +5,11 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS base
 
 RUN \
     apt-get update && \
     apt-get --no-install-recommends -y install \
-        gcc-11 \
-        g++-11 \
         libssl-dev \
         git \
         ca-certificates \
@@ -23,6 +21,14 @@ RUN \
         valgrind \
         gpg \
         gpg-agent \
-        mysql-client && \
+        mysql-client
+
+# gcc 11
+FROM base AS build-gcc11
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        gcc-11 \
+        g++-11 && \
     ln -s /usr/bin/g++-11 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-11 /usr/bin/gcc
