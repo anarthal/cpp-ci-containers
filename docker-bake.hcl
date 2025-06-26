@@ -31,3 +31,10 @@ target "build-ubuntu24" {
     ]
 }
 
+target "build-clang16-i386" {
+    dockerfile = "images/build-ubuntu24-i386.dockerfile"
+    tags = [
+        "build-clang16-i386:latest",
+        "build-clang16-i386:1",
+    ]
+}
