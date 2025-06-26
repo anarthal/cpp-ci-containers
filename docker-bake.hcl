@@ -20,7 +20,8 @@ target "build-ubuntu24" {
             "build-clang16",
             "build-clang17",
             "build-clang18",
-            "build-clang19"
+            "build-clang19",
+            "build-bench",
         ]
     }
     dockerfile = "images/build-ubuntu24.dockerfile"

@@ -87,3 +87,24 @@ RUN \
         libc++abi-19-dev && \
     ln -s /usr/bin/clang++-19 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-19 /usr/bin/clang
+
+
+# Benchmark image, which extends gcc-14
+# Installs libmysqlclient. This includes many directories we don't care about.
+# Removing them reduces the image size.
+# Includes in this tarfile are placed directly under include/,
+# unlike the ones in deb packages. Move them to reproduce deb layout.
+FROM build-gcc14 AS build-bench
+RUN \
+    apt-get --no-install-recommends -y install \
+        wget \
+        xz-utils \
+        mariadb-client \
+        libmariadb-dev && \
+    wget -q https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.4-linux-glibc2.28-x86_64.tar.xz && \
+        tar -xf mysql-8.4.4-linux-glibc2.28-x86_64.tar.xz && \
+        mkdir -p /opt/mysql-8.4.4/include/mysql && \
+        mv mysql-8.4.4-linux-glibc2.28-x86_64/lib /opt/mysql-8.4.4 && \
+        mv mysql-8.4.4-linux-glibc2.28-x86_64/include/* /opt/mysql-8.4.4/include/mysql/ && \
+        rm mysql-8.4.4-linux-glibc2.28-x86_64.tar.xz && \
+        rm -rf mysql-8.4.4-linux-glibc2.28-x86_64
