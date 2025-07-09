@@ -1,4 +1,9 @@
-# COPYRIGHT
+#
+# Copyright (c) 2019-2025 Ruben Perez Hidalgo (rubenperez038 at gmail dot com)
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
 
 target "mytest-mariadb" {
     context = "."
@@ -54,5 +59,21 @@ target "build-clang16-i386" {
     tags = [
         "build-clang16-i386:latest",
         "build-clang16-i386:1",
+    ]
+}
+
+target "build-noopenssl" {
+    dockerfile = "images/build-noopenssl.dockerfile"
+    tags = [
+        "build-noopenssl:latest",
+        "build-noopenssl:1",
+    ]
+}
+
+target "build-docs" {
+    dockerfile = "images/build-docs.dockerfile"
+    tags = [
+        "build-docs:latest",
+        "build-docs:1",
     ]
 }
