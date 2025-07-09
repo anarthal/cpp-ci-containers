@@ -5,23 +5,47 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-FROM ubuntu:16.04
+FROM ubuntu:16.04 AS base
 
 RUN \
     apt-get update && \
     apt-get --no-install-recommends -y install \
-        software-properties-common \
-        ca-certificates \
+        libssl-dev \
         git \
+        ca-certificates \
         python3 \
         python3-requests \
-        g++ \
-        gnupg-curl \
-        libssl-dev \
         ninja-build \
-        curl \
+        valgrind \
+        gpg \
+        gpg-agent \
         mysql-client && \
     ln -s /usr/bin/python3 /usr/bin/python
+
+# gcc 5
+FROM base AS build-gcc5
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        cmake \
+        gcc-5 \
+        g++-5 && \
+    ln -s /usr/bin/g++-5 /usr/bin/g++ && \
+    ln -s /usr/bin/gcc-5 /usr/bin/gcc
+
+# clang 3.6
+FROM base AS build-clang3_6
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        cmake \
+        clang-3.6 \
+        llvm-3.6 && \
+    ln -s /usr/bin/clang++-3.6 /usr/bin/clang++ && \
+    ln -s /usr/bin/clang-3.6 /usr/bin/clang
+
+# cmake 3.8
+FROM base AS build-cmake3_8
 
 RUN \
     mkdir -p ~/cmake && \
