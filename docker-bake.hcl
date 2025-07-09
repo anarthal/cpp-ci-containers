@@ -16,6 +16,23 @@ target "mytest-mariadb" {
     }
 }
 
+target "build-ubuntu20" {
+    name = tgt
+    matrix = {
+        "tgt" = [
+            "build-gcc10",
+            "build-clang7",
+            "build-clang11",
+        ]
+    }
+    dockerfile = "images/build-ubuntu20.dockerfile"
+    target = tgt
+    tags = [
+        "${tgt}:latest",
+        "${tgt}:1",
+    ]
+}
+
 target "build-ubuntu22" {
     name = tgt
     matrix = {
