@@ -81,6 +81,7 @@ target "build-ubuntu22" {
     name = tgt
     dockerfile = "images/build-ubuntu22.dockerfile"
     target = tgt
+    platforms = [ "linux/amd64", "linux/arm64/v8" ]
     tags = [
         "${tgt}:latest",
         "${tgt}:1",
