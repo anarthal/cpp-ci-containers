@@ -5,19 +5,24 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-target "mytest-mariadb" {
-    context = "."
+target "mariadb" {
+    matrix = {
+        "params" = [
+            { "name" = "mariadb-11_4_2", "image_version" = "11.4.2" }
+        ]
+    }
+    name = params.name
     dockerfile = "images/mariadb.dockerfile"
     tags = [
-        "mytest-mariadb:latest",
+        "${params.name}:latest",
+        "${params.name}:1",
     ]
     args = {
-        "BASE_IMAGE_VERSION" = "11.4.2"
+        "BASE_IMAGE_VERSION" = params.image_version
     }
 }
 
 target "build-ubuntu16" {
-    name = tgt
     matrix = {
         "tgt" = [
             "build-gcc5",
@@ -25,6 +30,7 @@ target "build-ubuntu16" {
             "build-cmake3_8",
         ]
     }
+    name = tgt
     dockerfile = "images/build-ubuntu16.dockerfile"
     target = tgt
     tags = [
@@ -34,12 +40,12 @@ target "build-ubuntu16" {
 }
 
 target "build-ubuntu18" {
-    name = tgt
     matrix = {
         "tgt" = [
             "build-gcc6",
         ]
     }
+    name = tgt
     dockerfile = "images/build-ubuntu18.dockerfile"
     target = tgt
     tags = [
@@ -49,7 +55,6 @@ target "build-ubuntu18" {
 }
 
 target "build-ubuntu20" {
-    name = tgt
     matrix = {
         "tgt" = [
             "build-gcc10",
@@ -57,6 +62,7 @@ target "build-ubuntu20" {
             "build-clang11",
         ]
     }
+    name = tgt
     dockerfile = "images/build-ubuntu20.dockerfile"
     target = tgt
     tags = [
@@ -66,13 +72,13 @@ target "build-ubuntu20" {
 }
 
 target "build-ubuntu22" {
-    name = tgt
     matrix = {
         "tgt" = [
             "build-gcc11",
             "build-clang14",
         ]
     }
+    name = tgt
     dockerfile = "images/build-ubuntu22.dockerfile"
     target = tgt
     tags = [
@@ -83,7 +89,6 @@ target "build-ubuntu22" {
 
 
 target "build-ubuntu24" {
-    name = tgt
     matrix = {
         "tgt" = [
             "build-gcc13",
@@ -95,6 +100,7 @@ target "build-ubuntu24" {
             "build-bench",
         ]
     }
+    name = tgt
     dockerfile = "images/build-ubuntu24.dockerfile"
     target = tgt
     tags = [
