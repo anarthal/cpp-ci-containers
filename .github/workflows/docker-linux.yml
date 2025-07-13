@@ -42,6 +42,4 @@ jobs:
         uses: docker/bake-action@v6
         with:
           push: true
-          targets:
-            - linux
-            - databases
+          targets: "linux,databases"
