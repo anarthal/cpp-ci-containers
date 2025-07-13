@@ -183,13 +183,39 @@ target "build-docs" {
 group "linux" {
     targets = [ 
         "build-ubuntu16",
-        # "build-ubuntu18",
-        # "build-ubuntu20",
-        # "build-ubuntu22",
-        # "build-ubuntu24",
-        # "build-clang16-i386",
-        # "build-noopenssl",
-        # "build-docs",
+        "build-ubuntu18",
+        "build-ubuntu20",
+        "build-ubuntu22",
+        "build-ubuntu24",
+        "build-clang16-i386",
+        "build-noopenssl",
+        "build-docs",
     ]
 }
 
+#
+# Windows
+#
+
+target "build-msvc" {
+    matrix = {
+        "config" = [
+            { "tgt" = "build-msvc14_1", "base_image" = "cppalliance/dronevs2017:1" },
+            { "tgt" = "build-msvc14_2", "base_image" = "cppalliance/dronevs2019:1" },
+            { "tgt" = "build-msvc14_3", "base_image" = "cppalliance/dronevs2022:1" },
+        ]
+    }
+    name = config.tgt
+    dockerfile = "images/build-msvc.dockerfile"
+    tags = [
+        "${config.tgt}:latest",
+        "${config.tgt}:1",
+    ]
+    args = {
+        "BASE_IMAGE" = config.base_image
+    }
+}
+
+group "windows" {
+    targets = [ "build-msvc" ]
+}
