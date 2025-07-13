@@ -10,6 +10,7 @@ FROM ubuntu:24.04
 RUN dpkg --add-architecture i386
 
 RUN \
+    export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get --no-install-recommends -y install \
         ca-certificates \

@@ -5,22 +5,68 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-target "mariadb" {
-    matrix = {
-        "params" = [
-            { "name" = "mariadb-11_4_2", "image_version" = "11.4.2" }
-        ]
-    }
-    name = params.name
-    dockerfile = "images/mariadb.dockerfile"
+#
+# Databases
+#
+target "mysql-5_7_41" {
+    dockerfile = "images/mysql.dockerfile"
     tags = [
-        "${params.name}:latest",
-        "${params.name}:1",
+        "mysql-5_7_41:latest",
+        "mysql-5_7_41:1",
     ]
     args = {
-        "BASE_IMAGE_VERSION" = params.image_version
+        "BASE_IMAGE_VERSION" = "5.7.41"
     }
 }
+
+
+target "mysql-8_4_1" {
+    dockerfile = "images/mysql.dockerfile"
+    tags = [
+        "mysql-8_4_1:latest",
+        "mysql-8_4_1:1",
+    ]
+    args = {
+        "BASE_IMAGE_VERSION" = "8.4.1"
+        "ENTRYPOINT_ARGS" = "--mysql-native-password=ON"
+    }
+    platforms = [ "linux/amd64", "linux/arm64/v8" ]
+}
+
+target "mysql-9_0_0" {
+    dockerfile = "images/mysql.dockerfile"
+    tags = [
+        "mysql-9_0_0:latest",
+        "mysql-9_0_0:1",
+    ]
+    args = {
+        "BASE_IMAGE_VERSION" = "9.0.0"
+    }
+}
+
+target "mariadb-11_4_2" {
+    dockerfile = "images/mariadb.dockerfile"
+    tags = [
+        "mariadb-11_4_2:latest",
+        "mariadb-11_4_2:1",
+    ]
+    args = {
+        "BASE_IMAGE_VERSION" = "11.4.2"
+    }
+}
+
+group "databases" {
+    targets = [ 
+        "mysql-5_7_41",
+        "mysql-8_4_1",
+        "mysql-9_0_0",
+        "mariadb-11_4_2",
+    ]
+}
+
+#
+# Linux containers
+#
 
 target "build-ubuntu16" {
     matrix = {
@@ -133,3 +179,17 @@ target "build-docs" {
         "build-docs:1",
     ]
 }
+
+group "linux" {
+    targets = [ 
+        "build-ubuntu16",
+        # "build-ubuntu18",
+        # "build-ubuntu20",
+        # "build-ubuntu22",
+        # "build-ubuntu24",
+        # "build-clang16-i386",
+        # "build-noopenssl",
+        # "build-docs",
+    ]
+}
+

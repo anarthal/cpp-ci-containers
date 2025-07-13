@@ -15,8 +15,8 @@ ARG ENTRYPOINT_ARGS
 ENV MYSQL_ALLOW_EMPTY_PASSWORD=1
 ENV MYSQL_ROOT_PASSWORD=
 
-COPY tools/docker/ssl.cnf /etc/mysql/conf.d/
-COPY tools/ssl/*.pem /etc/ssl/certs/mysql/
+COPY boost_mysql/ssl.cnf /etc/mysql/conf.d/
+COPY boost_mysql/ssl/*.pem /etc/ssl/certs/mysql/
 
 # Custom entry point to correctly set UNIX socket permissions, even if using volumes
 RUN <<EOF cat > /mysql_entrypoint.sh

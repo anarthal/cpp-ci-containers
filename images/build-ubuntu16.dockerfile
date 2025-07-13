@@ -8,6 +8,7 @@
 FROM ubuntu:16.04 AS base
 
 RUN \
+    export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get --no-install-recommends -y install \
         libssl-dev \
@@ -17,8 +18,7 @@ RUN \
         python3-requests \
         ninja-build \
         valgrind \
-        gpg \
-        gpg-agent \
+        gnupg-curl \
         mysql-client && \
     ln -s /usr/bin/python3 /usr/bin/python
 

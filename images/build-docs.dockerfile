@@ -7,7 +7,7 @@
 
 FROM ubuntu:22.04
 
-COPY tools/docker/install_build_docs.sh /
+COPY boost_mysql/install_build_docs.sh /
 
 ENV DOCBOOK_DTD_DIR=/opt/docbook-dtd
 ENV DOCBOOK_XSL_DIR=/opt/docbook-xsl

@@ -8,6 +8,7 @@
 FROM ubuntu:24.04 AS base
 
 RUN \
+    export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get --no-install-recommends -y install \
         libssl-dev \
