@@ -48,6 +48,7 @@ RUN \
 FROM base AS build-cmake3_8
 
 RUN \
+    apt-get --no-install-recommends -y install curl && \
     mkdir -p ~/cmake && \
     CMAKE_VERSION=3.8.0 && \
     curl -OLs https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-SHA-256.txt && \
@@ -59,4 +60,5 @@ RUN \
     bash cmake-${CMAKE_VERSION}-Linux-x86_64.sh --skip-license && \
     cd ~ && \
     rm -rf ~/cmake && \
-    cmake --version
+    cmake --version && \
+    apt-get -y remove curl
