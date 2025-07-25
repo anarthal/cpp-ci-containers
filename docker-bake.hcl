@@ -35,14 +35,14 @@ target "mysql-8_4_1" {
     platforms = [ "linux/amd64", "linux/arm64/v8" ]
 }
 
-target "mysql-9_0_0" {
+target "mysql-9_4_0" {
     dockerfile = "images/mysql.dockerfile"
     tags = [
-        "${tag_prefix}/mysql-9_0_0:latest",
-        "${tag_prefix}/mysql-9_0_0:1",
+        "${tag_prefix}/mysql-9_4_0:latest",
+        "${tag_prefix}/mysql-9_4_0:1",
     ]
     args = {
-        "BASE_IMAGE_VERSION" = "9.0.0"
+        "BASE_IMAGE_VERSION" = "9.4.0"
     }
 }
 
