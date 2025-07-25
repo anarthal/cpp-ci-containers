@@ -45,7 +45,7 @@ RUN \
     ln -s /usr/bin/clang-3.6 /usr/bin/clang
 
 # cmake 3.8
-FROM base AS build-cmake3_8
+FROM build-gcc5 AS build-cmake3_8
 
 RUN \
     apt-get --no-install-recommends -y install curl && \
