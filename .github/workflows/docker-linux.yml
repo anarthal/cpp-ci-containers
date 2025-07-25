@@ -42,4 +42,4 @@ jobs:
         uses: docker/bake-action@v6
         with:
           push: true
-          targets: "mysql-9_0_0" # TODO: restore this
+          targets: "linux,databases"
