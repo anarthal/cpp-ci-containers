@@ -5,14 +5,16 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
+tag_prefix = "ghcr.io/anarthal/cpp-ci-containers"
+
 #
 # Databases
 #
 target "mysql-5_7_41" {
     dockerfile = "images/mysql.dockerfile"
     tags = [
-        "mysql-5_7_41:latest",
-        "mysql-5_7_41:1",
+        "${tag_prefix}/mysql-5_7_41:latest",
+        "${tag_prefix}/mysql-5_7_41:1",
     ]
     args = {
         "BASE_IMAGE_VERSION" = "5.7.41"
@@ -23,8 +25,8 @@ target "mysql-5_7_41" {
 target "mysql-8_4_1" {
     dockerfile = "images/mysql.dockerfile"
     tags = [
-        "mysql-8_4_1:latest",
-        "mysql-8_4_1:1",
+        "${tag_prefix}/mysql-8_4_1:latest",
+        "${tag_prefix}/mysql-8_4_1:1",
     ]
     args = {
         "BASE_IMAGE_VERSION" = "8.4.1"
@@ -36,8 +38,8 @@ target "mysql-8_4_1" {
 target "mysql-9_0_0" {
     dockerfile = "images/mysql.dockerfile"
     tags = [
-        "mysql-9_0_0:latest",
-        "mysql-9_0_0:1",
+        "${tag_prefix}/mysql-9_0_0:latest",
+        "${tag_prefix}/mysql-9_0_0:1",
     ]
     args = {
         "BASE_IMAGE_VERSION" = "9.0.0"
@@ -47,8 +49,8 @@ target "mysql-9_0_0" {
 target "mariadb-11_4_2" {
     dockerfile = "images/mariadb.dockerfile"
     tags = [
-        "mariadb-11_4_2:latest",
-        "mariadb-11_4_2:1",
+        "${tag_prefix}/mariadb-11_4_2:latest",
+        "${tag_prefix}/mariadb-11_4_2:1",
     ]
     args = {
         "BASE_IMAGE_VERSION" = "11.4.2"
@@ -80,8 +82,8 @@ target "build-ubuntu16" {
     dockerfile = "images/build-ubuntu16.dockerfile"
     target = tgt
     tags = [
-        "${tgt}:latest",
-        "${tgt}:1",
+        "${tag_prefix}/${tgt}:latest",
+        "${tag_prefix}/${tgt}:1",
     ]
 }
 
@@ -95,8 +97,8 @@ target "build-ubuntu18" {
     dockerfile = "images/build-ubuntu18.dockerfile"
     target = tgt
     tags = [
-        "${tgt}:latest",
-        "${tgt}:1",
+        "${tag_prefix}/${tgt}:latest",
+        "${tag_prefix}/${tgt}:1",
     ]
 }
 
@@ -112,8 +114,8 @@ target "build-ubuntu20" {
     dockerfile = "images/build-ubuntu20.dockerfile"
     target = tgt
     tags = [
-        "${tgt}:latest",
-        "${tgt}:1",
+        "${tag_prefix}/${tgt}:latest",
+        "${tag_prefix}/${tgt}:1",
     ]
 }
 
@@ -129,8 +131,8 @@ target "build-ubuntu22" {
     target = tgt
     platforms = [ "linux/amd64", "linux/arm64/v8" ]
     tags = [
-        "${tgt}:latest",
-        "${tgt}:1",
+        "${tag_prefix}/${tgt}:latest",
+        "${tag_prefix}/${tgt}:1",
     ]
 }
 
@@ -151,32 +153,32 @@ target "build-ubuntu24" {
     dockerfile = "images/build-ubuntu24.dockerfile"
     target = tgt
     tags = [
-        "${tgt}:latest",
-        "${tgt}:1",
+        "${tag_prefix}/${tgt}:latest",
+        "${tag_prefix}/${tgt}:1",
     ]
 }
 
 target "build-clang16-i386" {
     dockerfile = "images/build-ubuntu24-i386.dockerfile"
     tags = [
-        "build-clang16-i386:latest",
-        "build-clang16-i386:1",
+        "${tag_prefix}/build-clang16-i386:latest",
+        "${tag_prefix}/build-clang16-i386:1",
     ]
 }
 
 target "build-noopenssl" {
     dockerfile = "images/build-noopenssl.dockerfile"
     tags = [
-        "build-noopenssl:latest",
-        "build-noopenssl:1",
+        "${tag_prefix}/build-noopenssl:latest",
+        "${tag_prefix}/build-noopenssl:1",
     ]
 }
 
 target "build-docs" {
     dockerfile = "images/build-docs.dockerfile"
     tags = [
-        "build-docs:latest",
-        "build-docs:1",
+        "${tag_prefix}/build-docs:latest",
+        "${tag_prefix}/build-docs:1",
     ]
 }
 
@@ -208,8 +210,8 @@ target "build-msvc" {
     name = config.tgt
     dockerfile = "images/build-msvc.dockerfile"
     tags = [
-        "${config.tgt}:latest",
-        "${config.tgt}:1",
+        "${tag_prefix}/${config.tgt}:latest",
+        "${tag_prefix}/${config.tgt}:1",
     ]
     args = {
         "BASE_IMAGE" = config.base_image
