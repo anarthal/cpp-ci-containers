@@ -61,7 +61,7 @@ group "databases" {
     targets = [ 
         "mysql-5_7_41",
         "mysql-8_4_1",
-        "mysql-9_0_0",
+        "mysql-9_4_0",
         "mariadb-11_4_2",
     ]
 }
