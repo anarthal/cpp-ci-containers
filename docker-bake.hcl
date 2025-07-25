@@ -182,6 +182,14 @@ target "build-docs" {
     ]
 }
 
+group "linux-others" {
+    targets = [ 
+        "build-clang16-i386",
+        "build-noopenssl",
+        "build-docs",
+    ]
+}
+
 group "linux" {
     targets = [ 
         "build-ubuntu16",
@@ -189,9 +197,7 @@ group "linux" {
         "build-ubuntu20",
         "build-ubuntu22",
         "build-ubuntu24",
-        "build-clang16-i386",
-        "build-noopenssl",
-        "build-docs",
+        "linux-others",
     ]
 }
 
