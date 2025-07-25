@@ -73,66 +73,66 @@ group "databases" {
 target "build-ubuntu16" {
     matrix = {
         "tgt" = [
-            "build-gcc5",
-            "build-clang3_6",
-            "build-cmake3_8",
+            { "name": "build-gcc5",     "version": 1 },
+            { "name": "build-clang3_6", "version": 1 },
+            { "name": "build-cmake3_8", "version": 1 },
         ]
     }
-    name = tgt
+    name = tgt.name
     dockerfile = "images/build-ubuntu16.dockerfile"
-    target = tgt
+    target = tgt.name
     tags = [
-        "${tag_prefix}/${tgt}:latest",
-        "${tag_prefix}/${tgt}:1",
+        "${tag_prefix}/${tgt.name}:latest",
+        "${tag_prefix}/${tgt.name}:${tgt.version}",
     ]
 }
 
 target "build-ubuntu18" {
     matrix = {
         "tgt" = [
-            "build-gcc6",
+            { "name": "build-gcc6", "version": 1 },
         ]
     }
-    name = tgt
+    name = tgt.name
     dockerfile = "images/build-ubuntu18.dockerfile"
-    target = tgt
+    target = tgt.name
     tags = [
-        "${tag_prefix}/${tgt}:latest",
-        "${tag_prefix}/${tgt}:1",
+        "${tag_prefix}/${tgt.name}:latest",
+        "${tag_prefix}/${tgt.name}:${tgt.version}",
     ]
 }
 
 target "build-ubuntu20" {
     matrix = {
         "tgt" = [
-            "build-gcc10",
-            "build-clang7",
-            "build-clang11",
+            { "name": "build-gcc10",   "version": 1 },
+            { "name": "build-clang7",  "version": 1 },
+            { "name": "build-clang11", "version": 1 },
         ]
     }
-    name = tgt
+    name = tgt.name
     dockerfile = "images/build-ubuntu20.dockerfile"
-    target = tgt
+    target = tgt.name
     tags = [
-        "${tag_prefix}/${tgt}:latest",
-        "${tag_prefix}/${tgt}:1",
+        "${tag_prefix}/${tgt.name}:latest",
+        "${tag_prefix}/${tgt.name}:${tgt.version}",
     ]
 }
 
 target "build-ubuntu22" {
     matrix = {
         "tgt" = [
-            "build-gcc11",
-            "build-clang14",
+            { "name": "build-gcc11",   "version": 1 },
+            { "name": "build-clang14", "version": 1 },
         ]
     }
-    name = tgt
+    name = tgt.name
     dockerfile = "images/build-ubuntu22.dockerfile"
-    target = tgt
+    target = tgt.name
     platforms = [ "linux/amd64", "linux/arm64/v8" ]
     tags = [
-        "${tag_prefix}/${tgt}:latest",
-        "${tag_prefix}/${tgt}:1",
+        "${tag_prefix}/${tgt.name}:latest",
+        "${tag_prefix}/${tgt.name}:${tgt.version}",
     ]
 }
 
@@ -140,21 +140,21 @@ target "build-ubuntu22" {
 target "build-ubuntu24" {
     matrix = {
         "tgt" = [
-            "build-gcc13",
-            "build-gcc14",
-            "build-clang16",
-            "build-clang17",
-            "build-clang18",
-            "build-clang19",
-            "build-bench",
+            { "name": "build-gcc13",   "version": 1 },
+            { "name": "build-gcc14",   "version": 1 },
+            { "name": "build-clang16", "version": 1 },
+            { "name": "build-clang17", "version": 1 },
+            { "name": "build-clang18", "version": 1 },
+            { "name": "build-clang19", "version": 1 },
+            { "name": "build-bench",   "version": 1 },
         ]
     }
-    name = tgt
+    name = tgt.name
     dockerfile = "images/build-ubuntu24.dockerfile"
-    target = tgt
+    target = tgt.name
     tags = [
-        "${tag_prefix}/${tgt}:latest",
-        "${tag_prefix}/${tgt}:1",
+        "${tag_prefix}/${tgt.name}:latest",
+        "${tag_prefix}/${tgt.name}:${tgt.version}",
     ]
 }
 
