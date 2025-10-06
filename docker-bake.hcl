@@ -129,6 +129,7 @@ target "build-ubuntu22" {
         "tgt" = [
             { "name": "build-gcc11",   "version": 1 },
             { "name": "build-gcc12",   "version": 1 },
+            { "name": "build-clang13", "version": 1 },
             { "name": "build-clang14", "version": 1 },
             { "name": "build-clang15", "version": 1 },
         ]

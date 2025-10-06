@@ -43,7 +43,18 @@ RUN \
     ln -s /usr/bin/g++-12 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-12 /usr/bin/gcc
 
-# clang 14 and 15
+# clang 13 to 15
+FROM base AS build-clang13
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        clang-13 \
+        llvm-13 \
+        libc++-13-dev \
+        libc++abi-13-dev && \
+    ln -s /usr/bin/clang++-13 /usr/bin/clang++ && \
+    ln -s /usr/bin/clang-13 /usr/bin/clang
+
 FROM base AS build-clang14
 
 RUN \
