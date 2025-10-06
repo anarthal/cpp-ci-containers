@@ -22,7 +22,7 @@ RUN \
         mysql-client && \
     ln -s /usr/bin/python3 /usr/bin/python
 
-# gcc 5
+# gcc 5 to 6
 FROM base AS build-gcc5
 
 RUN \
@@ -33,16 +33,16 @@ RUN \
     ln -s /usr/bin/g++-5 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-5 /usr/bin/gcc
 
-# clang 3.6
-FROM base AS build-clang3_6
+# clang 3.8
+FROM base AS build-clang3_8
 
 RUN \
     apt-get --no-install-recommends -y install \
         cmake \
-        clang-3.6 \
-        llvm-3.6 && \
-    ln -s /usr/bin/clang++-3.6 /usr/bin/clang++ && \
-    ln -s /usr/bin/clang-3.6 /usr/bin/clang
+        clang-3.8 \
+        llvm-3.8 && \
+    ln -s /usr/bin/clang++-3.8 /usr/bin/clang++ && \
+    ln -s /usr/bin/clang-3.8 /usr/bin/clang
 
 # cmake 3.8
 FROM base AS build-cmake3_8

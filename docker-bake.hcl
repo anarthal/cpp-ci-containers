@@ -74,7 +74,7 @@ target "build-ubuntu16" {
     matrix = {
         "tgt" = [
             { "name": "build-gcc5",     "version": 1 },
-            { "name": "build-clang3_6", "version": 1 },
+            { "name": "build-clang3_8", "version": 1 },
             { "name": "build-cmake3_8", "version": 3 },
         ]
     }
