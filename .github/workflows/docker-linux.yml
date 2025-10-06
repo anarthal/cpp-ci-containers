@@ -28,6 +28,7 @@ jobs:
           - build-ubuntu20
           - build-ubuntu22
           - build-ubuntu24
+          - build-ubuntu25
           - linux-others
     
     runs-on: ubuntu-latest

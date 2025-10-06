@@ -5,7 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-FROM ubuntu:22.04 AS base
+FROM ubuntu:25.10 AS base
 
 RUN \
     export DEBIAN_FRONTEND=noninteractive && \
@@ -24,33 +24,14 @@ RUN \
         gpg-agent \
         mysql-client
 
-# gcc 11 to 12
-FROM base AS build-gcc11
+# gcc 15
+FROM base AS build-gcc15
 
 RUN \
     apt-get --no-install-recommends -y install \
-        gcc-11 \
-        g++-11 && \
-    ln -s /usr/bin/g++-11 /usr/bin/g++ && \
-    ln -s /usr/bin/gcc-11 /usr/bin/gcc
+        gcc-15 \
+        g++-15 && \
+    ln -s /usr/bin/g++-15 /usr/bin/g++ && \
+    ln -s /usr/bin/gcc-15 /usr/bin/gcc
 
-FROM base AS build-gcc12
-
-RUN \
-    apt-get --no-install-recommends -y install \
-        gcc-12 \
-        g++-12 && \
-    ln -s /usr/bin/g++-12 /usr/bin/g++ && \
-    ln -s /usr/bin/gcc-12 /usr/bin/gcc
-
-# clang 14
-FROM base AS build-clang14
-
-RUN \
-    apt-get --no-install-recommends -y install \
-        clang-14 \
-        llvm-14 \
-        libc++-14-dev \
-        libc++abi-14-dev && \
-    ln -s /usr/bin/clang++-14 /usr/bin/clang++ && \
-    ln -s /usr/bin/clang-14 /usr/bin/clang
+# TODO: clang 21

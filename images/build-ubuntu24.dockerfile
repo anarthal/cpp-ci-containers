@@ -44,7 +44,7 @@ RUN \
     ln -s /usr/bin/gcc-14 /usr/bin/gcc
 
 
-# clang 16 to 19
+# clang 16 to 20
 FROM base AS build-clang16
 RUN \
     apt-get --no-install-recommends -y install \
@@ -88,6 +88,17 @@ RUN \
         libc++abi-19-dev && \
     ln -s /usr/bin/clang++-19 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-19 /usr/bin/clang
+
+FROM base AS build-clang20
+RUN \
+    apt-get --no-install-recommends -y install \
+        clang-20 \
+        llvm-20 \
+        libclang-rt-20-dev \
+        libc++-20-dev \
+        libc++abi-20-dev && \
+    ln -s /usr/bin/clang++-20 /usr/bin/clang++ && \
+    ln -s /usr/bin/clang-20 /usr/bin/clang
 
 
 # Benchmark image, which extends gcc-14

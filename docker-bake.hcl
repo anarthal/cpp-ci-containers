@@ -123,6 +123,7 @@ target "build-ubuntu22" {
     matrix = {
         "tgt" = [
             { "name": "build-gcc11",   "version": 1 },
+            { "name": "build-gcc12",   "version": 1 },
             { "name": "build-clang14", "version": 1 },
         ]
     }
@@ -146,11 +147,28 @@ target "build-ubuntu24" {
             { "name": "build-clang17", "version": 1 },
             { "name": "build-clang18", "version": 1 },
             { "name": "build-clang19", "version": 1 },
+            { "name": "build-clang20", "version": 1 },
             { "name": "build-bench",   "version": 1 },
         ]
     }
     name = tgt.name
     dockerfile = "images/build-ubuntu24.dockerfile"
+    target = tgt.name
+    tags = [
+        "${tag_prefix}/${tgt.name}:latest",
+        "${tag_prefix}/${tgt.name}:${tgt.version}",
+    ]
+}
+
+
+target "build-ubuntu25" {
+    matrix = {
+        "tgt" = [
+            { "name": "build-gcc15",   "version": 1 },
+        ]
+    }
+    name = tgt.name
+    dockerfile = "images/build-ubuntu25.dockerfile"
     target = tgt.name
     tags = [
         "${tag_prefix}/${tgt.name}:latest",
