@@ -33,5 +33,3 @@ RUN \
         g++-15 && \
     ln -s /usr/bin/g++-15 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-15 /usr/bin/gcc
-
-# TODO: clang 21
