@@ -24,7 +24,19 @@ RUN \
         mysql-client && \
     ln -s /usr/bin/python3 /usr/bin/python
 
-# clang 7
+# clang 6 to 7
+FROM base AS build-clang6
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        cmake \
+        clang-6 \
+        llvm-6 \
+        libc++-6-dev \
+        libc++abi-6-dev && \
+    ln -s /usr/bin/clang++-6 /usr/bin/clang++ && \
+    ln -s /usr/bin/clang-6 /usr/bin/clang
+
 FROM base AS build-clang7
 
 RUN \
