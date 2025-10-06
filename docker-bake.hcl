@@ -76,7 +76,6 @@ target "build-ubuntu16" {
             { "name": "build-gcc5",     "version": 1 },
             { "name": "build-clang3_8", "version": 1 },
             { "name": "build-clang4",   "version": 1 },
-            { "name": "build-clang5",   "version": 1 },
             { "name": "build-cmake3_8", "version": 3 },
         ]
     }
@@ -95,7 +94,8 @@ target "build-ubuntu18" {
             { "name": "build-gcc6",   "version": 1 },
             { "name": "build-gcc7",   "version": 1 },
             { "name": "build-gcc8",   "version": 1 },
-            { "name": "build-clang6",   "version": 1 },
+            { "name": "build-clang5", "version": 1 },
+            { "name": "build-clang6", "version": 1 },
             { "name": "build-clang7", "version": 2 },
         ]
     }

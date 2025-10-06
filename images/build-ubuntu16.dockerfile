@@ -50,23 +50,9 @@ RUN \
     apt-get --no-install-recommends -y install \
         cmake \
         clang-4.0 \
-        llvm-4.0 \
-        libc++-4.0-dev \
-        libc++abi-4.0-dev && \
+        llvm-4.0 && \
     ln -s /usr/bin/clang++-4.0 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-4.0 /usr/bin/clang
-
-FROM base AS build-clang5
-
-RUN \
-    apt-get --no-install-recommends -y install \
-        cmake \
-        clang-5 \
-        llvm-5 \
-        libc++-5-dev \
-        libc++abi-5-dev && \
-    ln -s /usr/bin/clang++-5 /usr/bin/clang++ && \
-    ln -s /usr/bin/clang-5 /usr/bin/clang
 
 # cmake 3.8
 FROM base AS build-cmake3_8
