@@ -43,18 +43,7 @@ RUN \
     ln -s /usr/bin/g++-10 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-10 /usr/bin/gcc
 
-# clang 7 to 12
-FROM base AS build-clang7
-
-RUN \
-    apt-get --no-install-recommends -y install \
-        clang-7 \
-        llvm-7 \
-        libc++-7-dev \
-        libc++abi-7-dev && \
-    ln -s /usr/bin/clang++-7 /usr/bin/clang++ && \
-    ln -s /usr/bin/clang-7 /usr/bin/clang
-
+# clang 8 to 12
 FROM base AS build-clang8
 
 RUN \
