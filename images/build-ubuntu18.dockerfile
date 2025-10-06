@@ -24,7 +24,7 @@ RUN \
         mysql-client && \
     ln -s /usr/bin/python3 /usr/bin/python
 
-# gcc 6
+# gcc 6 to 8
 FROM base AS build-gcc6
 
 RUN \
@@ -33,3 +33,21 @@ RUN \
         g++-6 && \
     ln -s /usr/bin/g++-6 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-6 /usr/bin/gcc
+
+FROM base AS build-gcc7
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        gcc-7 \
+        g++-7 && \
+    ln -s /usr/bin/g++-7 /usr/bin/g++ && \
+    ln -s /usr/bin/gcc-7 /usr/bin/gcc
+
+FROM base AS build-gcc8
+
+RUN \
+    apt-get --no-install-recommends -y install \
+        gcc-8 \
+        g++-8 && \
+    ln -s /usr/bin/g++-8 /usr/bin/g++ && \
+    ln -s /usr/bin/gcc-8 /usr/bin/gcc

@@ -91,6 +91,8 @@ target "build-ubuntu18" {
     matrix = {
         "tgt" = [
             { "name": "build-gcc6", "version": 1 },
+            { "name": "build-gcc7", "version": 1 },
+            { "name": "build-gcc8", "version": 1 },
         ]
     }
     name = tgt.name
