@@ -49,7 +49,9 @@ FROM base AS build-clang7
 RUN \
     apt-get --no-install-recommends -y install \
         clang-7 \
-        llvm-7 && \
+        llvm-7 \
+        libc++-7-dev \
+        libc++abi-7-dev && \
     ln -s /usr/bin/clang++-7 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-7 /usr/bin/clang
 
@@ -58,7 +60,9 @@ FROM base AS build-clang8
 RUN \
     apt-get --no-install-recommends -y install \
         clang-8 \
-        llvm-8 && \
+        llvm-8  \
+        libc++-8-dev \
+        libc++abi-8-dev && \
     ln -s /usr/bin/clang++-8 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-8 /usr/bin/clang
 
@@ -68,7 +72,9 @@ FROM base AS build-clang9
 RUN \
     apt-get --no-install-recommends -y install \
         clang-9 \
-        llvm-9 && \
+        llvm-9 \
+        libc++-9-dev \
+        libc++abi-9-dev && \
     ln -s /usr/bin/clang++-9 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-9 /usr/bin/clang
 
@@ -78,7 +84,9 @@ FROM base AS build-clang10
 RUN \
     apt-get --no-install-recommends -y install \
         clang-10 \
-        llvm-10 && \
+        llvm-10 \
+        libc++-10-dev \
+        libc++abi-10-dev && \
     ln -s /usr/bin/clang++-10 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-10 /usr/bin/clang
 
@@ -88,7 +96,9 @@ FROM base AS build-clang11
 RUN \
     apt-get --no-install-recommends -y install \
         clang-11 \
-        llvm-11 && \
+        llvm-11 \
+        libc++-11-dev \
+        libc++abi-11-dev && \
     ln -s /usr/bin/clang++-11 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-11 /usr/bin/clang
 
@@ -98,6 +108,8 @@ FROM base AS build-clang12
 RUN \
     apt-get --no-install-recommends -y install \
         clang-12 \
-        llvm-12 && \
+        llvm-12 \
+        libc++-12-dev \
+        libc++abi-12-dev && \
     ln -s /usr/bin/clang++-12 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-12 /usr/bin/clang

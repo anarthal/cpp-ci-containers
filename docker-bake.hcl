@@ -107,12 +107,12 @@ target "build-ubuntu20" {
         "tgt" = [
             { "name": "build-gcc9",    "version": 1 },
             { "name": "build-gcc10",   "version": 1 },
-            { "name": "build-clang7",  "version": 1 },
-            { "name": "build-clang8",  "version": 1 },
-            { "name": "build-clang9",  "version": 1 },
-            { "name": "build-clang10", "version": 1 },
-            { "name": "build-clang11", "version": 1 },
-            { "name": "build-clang12", "version": 1 },
+            { "name": "build-clang7",  "version": 2 },
+            { "name": "build-clang8",  "version": 2 },
+            { "name": "build-clang9",  "version": 2 },
+            { "name": "build-clang10", "version": 2 },
+            { "name": "build-clang11", "version": 2 },
+            { "name": "build-clang12", "version": 2 },
         ]
     }
     name = tgt.name
