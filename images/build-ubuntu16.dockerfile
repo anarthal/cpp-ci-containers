@@ -45,10 +45,15 @@ RUN \
     ln -s /usr/bin/clang-3.6 /usr/bin/clang
 
 # cmake 3.8
-FROM build-gcc5 AS build-cmake3_8
+FROM base AS build-cmake3_8
 
 RUN \
-    apt-get --no-install-recommends -y install curl && \
+    apt-get --no-install-recommends -y install \
+        gcc-5 \
+        g++-5 \
+        curl && \
+    ln -s /usr/bin/g++-5 /usr/bin/g++ && \
+    ln -s /usr/bin/gcc-5 /usr/bin/gcc && \
     mkdir -p ~/cmake && \
     CMAKE_VERSION=3.8.0 && \
     curl -OLs https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-SHA-256.txt && \
