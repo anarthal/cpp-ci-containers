@@ -43,6 +43,12 @@ RUN \
     ln -s /usr/bin/g++-14 /usr/bin/g++ && \
     ln -s /usr/bin/gcc-14 /usr/bin/gcc
 
+FROM build-gcc14 AS build-gcc14-lcov
+
+RUN \
+    export DEBIAN_FRONTEND=noninteractive && \
+    apt-get --no-install-recommends -y install lcov
+
 
 # clang 16 to 20
 FROM base AS build-clang16

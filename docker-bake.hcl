@@ -153,14 +153,15 @@ target "build-ubuntu22" {
 target "build-ubuntu24" {
     matrix = {
         "tgt" = [
-            { "name": "build-gcc13",   "version": 1 },
-            { "name": "build-gcc14",   "version": 1 },
-            { "name": "build-clang16", "version": 1 },
-            { "name": "build-clang17", "version": 1 },
-            { "name": "build-clang18", "version": 1 },
-            { "name": "build-clang19", "version": 1 },
-            { "name": "build-clang20", "version": 1 },
-            { "name": "build-bench",   "version": 1 },
+            { "name": "build-gcc13",      "version": 1 },
+            { "name": "build-gcc14",      "version": 1 },
+            { "name": "build-gcc14-lcov", "version": 1 },
+            { "name": "build-clang16",    "version": 1 },
+            { "name": "build-clang17",    "version": 1 },
+            { "name": "build-clang18",    "version": 1 },
+            { "name": "build-clang19",    "version": 1 },
+            { "name": "build-clang20",    "version": 1 },
+            { "name": "build-bench",      "version": 1 },
         ]
     }
     name = tgt.name
