@@ -5,8 +5,9 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-ARG BASE_IMAGE=cppalliance/dronevs2022:1
-FROM ${BASE_IMAGE}
+# Ships every MSVC toolset from v141 (VS2017) to v145 (VS2026) in a single
+# VS2026 BuildTools install
+FROM cppalliance/dronevs2026:2
 
 COPY boost_mysql/win-ci.cnf C:/my.cnf
 COPY boost_mysql/ssl C:/ssl

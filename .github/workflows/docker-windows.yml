@@ -20,14 +20,6 @@ permissions:
 # Windows containers can't be built with buildx/bake, at least in GHA
 jobs:
   docker-windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { name: "build-msvc14_1", base_image: "cppalliance/dronevs2017:1", version: 2 }
-          - { name: "build-msvc14_2", base_image: "cppalliance/dronevs2019:1", version: 2 }
-          - { name: "build-msvc14_3", base_image: "cppalliance/dronevs2022:1", version: 2 }
-
     runs-on: windows-2025
 
     steps:
@@ -44,14 +36,14 @@ jobs:
       - name: Build and push
         shell: bash
         env:
-          IMAGE: ghcr.io/anarthal/cpp-ci-containers/${{ matrix.name }}
+          IMAGE: ghcr.io/anarthal/cpp-ci-containers/build-msvc
+          VERSION: 1
         run: |
           set -e
           docker build \
             -f images/build-msvc.dockerfile \
-            --build-arg "BASE_IMAGE=${{ matrix.base_image }}" \
             -t "$IMAGE:latest" \
-            -t "$IMAGE:${{ matrix.version }}" \
+            -t "$IMAGE:$VERSION" \
             .
           docker push "$IMAGE:latest"
-          docker push "$IMAGE:${{ matrix.version }}"
+          docker push "$IMAGE:$VERSION"
