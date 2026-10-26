@@ -23,6 +23,23 @@ jobs:
     runs-on: windows-2025
 
     steps:
+      # The Docker service sometimes fails to start when the runner boots, leaving
+      # the daemon unreachable for the entire job. Restarting it always fixes it.
+      # See https://github.com/actions/runner-images/issues/13729
+      - name: Ensure the Docker daemon is running
+        shell: pwsh
+        run: |
+          if ((Get-Service -Name docker).Status -ne 'Running') {
+            Start-Service -Name docker
+          }
+          $deadline = (Get-Date).AddMinutes(2)
+          while ($true) {
+            docker version --format '{{.Server.Version}}'
+            if ($LASTEXITCODE -eq 0) { break }
+            if ((Get-Date) -gt $deadline) { throw 'The Docker daemon did not become available' }
+            Start-Sleep -Seconds 2
+          }
+
       - name: Log in to the Container registry
         uses: docker/login-action@v4
         with:
