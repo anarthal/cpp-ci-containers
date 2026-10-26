@@ -248,7 +248,7 @@ target "build-msvc" {
     dockerfile = "images/build-msvc.dockerfile"
     tags = [
         "${tag_prefix}/${config.tgt}:latest",
-        "${tag_prefix}/${config.tgt}:1",
+        "${tag_prefix}/${config.tgt}:2",
     ]
     args = {
         "BASE_IMAGE" = config.base_image
