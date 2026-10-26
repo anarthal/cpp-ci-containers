@@ -8,8 +8,8 @@
 ARG BASE_IMAGE=cppalliance/dronevs2022:1
 FROM ${BASE_IMAGE}
 
-COPY tools/win-ci.cnf C:/my.cnf
-COPY tools/ssl C:/ssl
+COPY boost_mysql/win-ci.cnf C:/my.cnf
+COPY boost_mysql/ssl C:/ssl
 
 RUN choco install --no-progress -y mysql --version 8.0.20
 
