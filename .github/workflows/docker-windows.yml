@@ -17,8 +17,17 @@ permissions:
   # Required to save Docker containers to the GitHub container registry
   packages: write
 
+# Windows containers can't be built with buildx/bake, at least in GHA
 jobs:
   docker-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "build-msvc14_1", base_image: "cppalliance/dronevs2017:1", version: 2 }
+          - { name: "build-msvc14_2", base_image: "cppalliance/dronevs2019:1", version: 2 }
+          - { name: "build-msvc14_3", base_image: "cppalliance/dronevs2022:1", version: 2 }
+
     runs-on: windows-2025
 
     steps:
@@ -32,11 +41,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       - name: Build and push
-        uses: docker/bake-action@v7
-        with:
-          push: true
-          targets: "windows"
+        shell: bash
+        env:
+          IMAGE: ghcr.io/anarthal/cpp-ci-containers/${{ matrix.name }}
+        run: |
+          set -e
+          docker build \
+            -f images/build-msvc.dockerfile \
+            --build-arg "BASE_IMAGE=${{ matrix.base_image }}" \
+            -t "$IMAGE:latest" \
+            -t "$IMAGE:${{ matrix.version }}" \
+            .
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:${{ matrix.version }}"

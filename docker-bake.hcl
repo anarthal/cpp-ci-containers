@@ -232,29 +232,3 @@ group "linux" {
     ]
 }
 
-#
-# Windows
-#
-
-target "build-msvc" {
-    matrix = {
-        "config" = [
-            { "tgt" = "build-msvc14_1", "base_image" = "cppalliance/dronevs2017:1" },
-            { "tgt" = "build-msvc14_2", "base_image" = "cppalliance/dronevs2019:1" },
-            { "tgt" = "build-msvc14_3", "base_image" = "cppalliance/dronevs2022:1" },
-        ]
-    }
-    name = config.tgt
-    dockerfile = "images/build-msvc.dockerfile"
-    tags = [
-        "${tag_prefix}/${config.tgt}:latest",
-        "${tag_prefix}/${config.tgt}:2",
-    ]
-    args = {
-        "BASE_IMAGE" = config.base_image
-    }
-}
-
-group "windows" {
-    targets = [ "build-msvc" ]
-}
