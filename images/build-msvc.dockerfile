@@ -41,14 +41,31 @@ COPY boost_mysql/win-ci.cnf C:/my.cnf
 COPY boost_mysql/ssl C:/ssl
 RUN choco install --no-progress -y mysql --version 8.0.20
 
-# OpenSSL, in both address models, where the b2 and CMake builds expect it
-RUN powershell -Command \
+# OpenSSL, in both address models, where the b2 and CMake builds expect it. This
+# build ships x86, x64 and arm64 in a single archive, already laid out as
+# bin/include/lib, so it's an extract rather than two installer runs into a fixed
+# location. The chocolatey package wraps the Shining Light installers, which can
+# only hold one address model at a time, hence the install/copy/reinstall/copy/
+# uninstall it replaces.
+# 3.5.x is the current LTS. The URL and the checksum below are the ones published
+# at https://kb.firedaemon.com/support/solutions/articles/4000121705
+RUN powershell -NoProfile -Command \
     $ErrorActionPreference = 'Stop' ; \
-    $OPENSSL_VERSION = '1.1.1.1900' ; \
-    choco install --no-progress -y --force --forceX86 --version $OPENSSL_VERSION openssl ; \
-    Copy-Item 'C:/Program Files (x86)/OpenSSL-Win32/' -Recurse -Destination 'C:/openssl-32/' ; \
-    choco install --no-progress -y --force --version $OPENSSL_VERSION openssl ; \
-    Copy-Item 'C:/Program Files/OpenSSL-Win64/' -Recurse -Destination 'C:/openssl-64/' ; \
-    choco uninstall -y openssl
+    Invoke-WebRequest -UseBasicParsing -OutFile 'C:/tmp/openssl.zip' \
+        -Uri 'https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-3.5.9.zip' ; \
+    $expected = '76DA391395BE029B44794857B9FF380255E02A0960A98314CD3F6A6816D82696' ; \
+    $actual = (Get-FileHash 'C:/tmp/openssl.zip' -Algorithm SHA256).Hash ; \
+    if ($actual -ne $expected) { throw \"openssl.zip checksum mismatch: $actual\" } ; \
+    Expand-Archive 'C:/tmp/openssl.zip' -DestinationPath 'C:/tmp/openssl' ; \
+    Move-Item 'C:/tmp/openssl/x86' 'C:/openssl-32' ; \
+    Move-Item 'C:/tmp/openssl/x64' 'C:/openssl-64' ; \
+    Copy-Item 'C:/tmp/openssl/LICENSE.txt' 'C:/openssl-32' ; \
+    Copy-Item 'C:/tmp/openssl/LICENSE.txt' 'C:/openssl-64' ; \
+    Remove-Item -Recurse -Force 'C:/tmp/openssl', 'C:/tmp/openssl.zip' ; \
+    Get-ChildItem 'C:/openssl-32', 'C:/openssl-64' -Recurse -Filter *.pdb | Remove-Item -Force
+
+# The .lib files are import libraries, so the test binaries load the DLLs at run
+# time. The two address models use different DLL names, so both can be on PATH.
+RUN setx /M PATH "C:\openssl-64\bin;C:\openssl-32\bin;%PATH%"
 
 ENTRYPOINT ["powershell.exe", "-NoLogo", "-ExecutionPolicy", "Bypass"]
