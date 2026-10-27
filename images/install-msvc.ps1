@@ -23,24 +23,39 @@ $ErrorActionPreference = 'Stop'
 # build of the installer runs doesn't affect the compiler we get.
 # Note this makes every image a Visual Studio "18" instance: CMake builds need
 # the "Visual Studio 18 2026" generator.
-#   Component:  VS component ID of the toolset, pinning its exact version
-#   VcvarsVer:  the version vcvarsall's -vcvars_ver takes, which is also the
-#               prefix of the toolset's directory under VC\Tools\MSVC
+#   Components: VS component IDs to install for this toolset
+#   Dir:        matches the toolset's directory under VC\Tools\MSVC
 #   Cl:         the version cl.exe must report
+#
+# vcvarsall.bat ships in the package Microsoft.VisualCpp.Tools.Core.x86, which the
+# versioned toolset components don't pull in (v141 is the one exception). The
+# ComponentGroup.VC.Tools.14x groups do, and they're built from the same packages
+# the matching toolset already installs, so they cost ~4MB.
 # aka.ms/vs/18/release doesn't exist; VS2026 is published under "stable"
 $bootstrapperUrl = 'https://aka.ms/vs/18/stable/vs_buildtools.exe'
 $toolsets = @{
-    # MSVC v141 - VS2017 C++ build tools. There is no versioned component ID for
-    # it, but it needs none: 14.16 is the final, and only, v141 toolset.
-    '14.1' = @{ Component = 'Microsoft.VisualStudio.Component.VC.v141.x86.x64';        VcvarsVer = '14.16'; Cl = '19.16' }
+    # MSVC v141 - VS2017 C++ build tools. No versioned component ID exists, and it
+    # needs none: 14.16 is the final, and only, v141 toolset. It's also the only
+    # toolset component that brings vcvarsall.bat along.
+    '14.1' = @{ Components = @('Microsoft.VisualStudio.Component.VC.v141.x86.x64')
+                Dir = '14.16*'; Cl = '19.16' }
     # MSVC v142 - VS2019 C++ build tools (v14.29-16.11)
-    '14.2' = @{ Component = 'Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64'; VcvarsVer = '14.29'; Cl = '19.29' }
+    '14.2' = @{ Components = @('Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64',
+                               'Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64')
+                Dir = '14.29*'; Cl = '19.29' }
     # MSVC v143 - VS2022 C++ build tools (v14.44-17.14). b2 calls every VS2022
     # toolset 14.3, so there is no "14.4" to install.
-    '14.3' = @{ Component = 'Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64'; VcvarsVer = '14.44'; Cl = '19.44' }
-    # MSVC v145 - VS2026 C++ build tools (v14.50-18.0). This is the toolset that
-    # forces the VS2026 installer: the VS2022 catalog stops at 14.44.
-    '14.5' = @{ Component = 'Microsoft.VisualStudio.Component.VC.14.50.18.0.x86.x64'; VcvarsVer = '14.50'; Cl = '19.50' }
+    '14.3' = @{ Components = @('Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64',
+                               'Microsoft.VisualStudio.ComponentGroup.VC.Tools.143.x86.x64')
+                Dir = '14.44*'; Cl = '19.44' }
+    # MSVC v145 - VS2026. This one takes the current toolset rather than a pinned
+    # one: there is no ComponentGroup.VC.Tools.145 to pair with the versioned
+    # component, and VC.Tools.x86.x64 brings vcvarsall.bat while being ~0.9GB
+    # smaller, since the versioned components carry their own copy of everything
+    # and then pull the current tools anyway. The version floats with VS, which is
+    # what you want from the image that tracks the newest MSVC.
+    '14.5' = @{ Components = @('Microsoft.VisualStudio.Component.VC.Tools.x86.x64')
+                Dir = '14.5*'; Cl = '19.5' }
 }
 $toolset = $toolsets[$B2Toolset]
 
@@ -54,27 +69,19 @@ $bootstrapper = 'C:\tmp\vs_buildtools.exe'
 # VS Identity, two .NET runtimes, the VS terminal and Roslyn ServiceHub).
 # Each toolset component is self-contained: it carries its own CRT, compilers,
 # PGO, DIA SDK, MSBuild targets and VC redistributables. What it doesn't carry is
-# vcvarsall.bat (VC.CoreBuildTools), MSBuild itself (Microsoft.Component.MSBuild)
-# and the Windows SDK, which holds the Win32 headers and libs and the UCRT.
-Write-Host ('Installing {0} ({1})' -f $toolset.Component, $B2Toolset)
+# the VC core and VsDevCmd (VC.CoreBuildTools), MSBuild itself
+# (Microsoft.Component.MSBuild) and the Windows SDK, which holds the Win32 headers
+# and libs and the UCRT.
+Write-Host ('Installing {0}: {1}' -f $B2Toolset, ($toolset.Components -join ', '))
 Invoke-WebRequest -UseBasicParsing -Uri $bootstrapperUrl -OutFile $bootstrapper
-$proc = Start-Process -FilePath $bootstrapper -Wait -PassThru -NoNewWindow -ArgumentList @(
+# --add silently ignores anything that isn't a workload, component or component
+# group - no error, no log line - so every ID here has to be one of those.
+$components = @('Microsoft.VisualStudio.Component.VC.CoreBuildTools',
+                'Microsoft.Component.MSBuild',
+                'Microsoft.VisualStudio.Component.Windows11SDK.26100') + $toolset.Components
+$proc = Start-Process -FilePath $bootstrapper -Wait -PassThru -NoNewWindow -ArgumentList (@(
     '--quiet', '--wait', '--norestart', '--nocache',
-    '--installPath', $installPath,
-    '--add', 'Microsoft.VisualStudio.Component.VC.CoreBuildTools',
-    '--add', 'Microsoft.Component.MSBuild',
-    # vcvarsall.bat lives here, together with Microsoft.VCToolsVersion.default.txt.
-    # No component we install pulls it in: VC.CoreBuildTools doesn't, and neither
-    # does any of the versioned toolset components (v141 is the exception, which is
-    # why that was the only image that worked). The alternative is the
-    # VC.Tools.x86.x64 component, but that drags in the current toolset too, ~2GB
-    # for a 14KB file. This is a package rather than a component ID, which the
-    # installer takes but doesn't document; the check further down catches it if
-    # that ever stops being true.
-    '--add', 'Microsoft.VisualCpp.Tools.Core.x86',
-    '--add', $toolset.Component,
-    '--add', 'Microsoft.VisualStudio.Component.Windows11SDK.26100'
-)
+    '--installPath', $installPath) + ($components | ForEach-Object { '--add'; $_ }))
 Write-Host ('vs_buildtools.exe exited with {0}' -f $proc.ExitCode)
 if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
     throw ('vs_buildtools.exe failed with exit code {0}' -f $proc.ExitCode)
@@ -111,26 +118,27 @@ Write-Host ('{0} files, {1:N2} GB under {2}' -f
 # instead of hardcoding it.
 $msvcDir = Join-Path $installPath 'VC\Tools\MSVC'
 $toolsetDir = Get-ChildItem -Directory -Path $msvcDir |
-    Where-Object Name -Like ('{0}.*' -f $toolset.VcvarsVer) | Sort-Object Name | Select-Object -Last 1
-if (-not $toolsetDir) { throw ('No MSVC toolset matching {0}.* under {1}' -f $toolset.VcvarsVer, $msvcDir) }
+    Where-Object Name -Like $toolset.Dir | Sort-Object Name | Select-Object -Last 1
+if (-not $toolsetDir) { throw ('No MSVC toolset matching {0} under {1}' -f $toolset.Dir, $msvcDir) }
 Write-Host ('Installed toolset: {0}' -f $toolsetDir.Name)
+# -vcvars_ver takes the two-component version, which only the directory knows: the
+# component ID doesn't carry it at all for 14.5, and only partly for the others.
+$vcvarsVer = ($toolsetDir.Name -split '\.')[0, 1] -join '.'
 
 $cl = Join-Path $toolsetDir.FullName 'bin\Hostx64\x64\cl.exe'
 if (-not (Test-Path $cl)) { throw ('cl.exe not found: {0}' -f $cl) }
-$auxBuild = Join-Path $installPath 'VC\Auxiliary\Build'
-$vcvarsall = Join-Path $auxBuild 'vcvarsall.bat'
+
+$vcvarsall = Join-Path $installPath 'VC\Auxiliary\Build\vcvarsall.bat'
 if (-not (Test-Path $vcvarsall)) {
-    # It comes from Microsoft.VisualCpp.Tools.Core.x86, which is --added above.
-    # Show what did land before giving up.
     Get-ChildItem (Join-Path $installPath 'VC') -Depth 2 -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty FullName | Write-Host
     throw ('vcvarsall.bat not found: {0}' -f $vcvarsall)
 }
 
-# That package also brings a default.txt naming the toolset the installer considers
-# current, which isn't the one this image has. MSBuild and CMake read it to pick a
-# compiler, so point it at what's actually installed.
-Set-Content -Path (Join-Path $auxBuild 'Microsoft.VCToolsVersion.default.txt') `
+# Name the toolset this image actually has: the default.txt the installer leaves
+# behind names the one it considers current, which isn't installed here. MSBuild
+# and CMake read it to pick a compiler.
+Set-Content -Path (Join-Path $installPath 'VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt') `
     -Value $toolsetDir.Name -Encoding ascii
 
 # b2 only auto-detects a toolset that lives in its own generation's Visual Studio
@@ -140,7 +148,7 @@ Set-Content -Path (Join-Path $auxBuild 'Microsoft.VCToolsVersion.default.txt') `
 # %SystemRoot% on every run, independently of the user-config.jam that CI jobs
 # overwrite. This mirrors what the cppalliance/dronevs images do.
 $wrapper = 'C:\vcvars.bat'
-('@call "{0}" %* -vcvars_ver={1}' -f $vcvarsall, $toolset.VcvarsVer) | Set-Content -Path $wrapper -Encoding ascii
+('@call "{0}" %* -vcvars_ver={1}' -f $vcvarsall, $vcvarsVer) | Set-Content -Path $wrapper -Encoding ascii
 ('using msvc : {0} : "{1}" : <setup>"{2}" ;' -f $B2Toolset, ($cl -replace '\\', '/'), ($wrapper -replace '\\', '/')) |
     Set-Content -Path 'C:\Windows\site-config.jam' -Encoding ascii
 
