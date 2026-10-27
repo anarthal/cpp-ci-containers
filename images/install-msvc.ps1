@@ -66,11 +66,36 @@ $proc = Start-Process -FilePath $bootstrapper -Wait -PassThru -NoNewWindow -Argu
     '--add', $toolset.Component,
     '--add', 'Microsoft.VisualStudio.Component.Windows11SDK.26100'
 )
-# 3010 is "installed, but needs a reboot", which doesn't apply to a container
+Write-Host ('vs_buildtools.exe exited with {0}' -f $proc.ExitCode)
 if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
     throw ('vs_buildtools.exe failed with exit code {0}' -f $proc.ExitCode)
 }
+# --quiet sends everything to the logs, so individual components can fail without
+# the exit code saying so. This is the check the dotnet/framework images use.
+$errorLogs = @(Get-ChildItem $env:TEMP -Filter 'dd_setup_*_errors.log' | Where-Object Length -gt 0)
+foreach ($log in $errorLogs) {
+    Write-Host ('=== {0}' -f $log.FullName)
+    Get-Content $log.FullName | Write-Host
+}
+if ($errorLogs) { throw 'the Visual Studio installer reported errors' }
 Remove-Item $bootstrapper
+Write-Host ('Free space on C: {0:N1} GB' -f ((Get-PSDrive C).Free / 1GB))
+
+# TEMPORARY: what the installer actually recorded and laid down
+Write-Host '=== installed packages ==='
+Get-ChildItem 'C:\ProgramData\Microsoft\VisualStudio\Packages\_Instances' -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        $state = Join-Path $_.FullName 'state.json'
+        if (Test-Path $state) {
+            (Get-Content $state -Raw | ConvertFrom-Json).packages |
+                ForEach-Object { '{0} {1}' -f $_.id, $_.version } | Sort-Object | Write-Host
+        }
+    }
+Write-Host '=== installed files ==='
+$installed = @(Get-ChildItem $installPath -Recurse -File -ErrorAction SilentlyContinue)
+$installed | ForEach-Object { $_.FullName } | Write-Host
+Write-Host ('{0} files, {1:N2} GB under {2}' -f
+    $installed.Count, (($installed | Measure-Object Length -Sum).Sum / 1GB), $installPath)
 
 # The component ID pins the first two components of the toolset version only; the
 # third moves with Visual Studio servicing updates, so look the directory up
@@ -84,7 +109,14 @@ Write-Host ('Installed toolset: {0}' -f $toolsetDir.Name)
 $cl = Join-Path $toolsetDir.FullName 'bin\Hostx64\x64\cl.exe'
 if (-not (Test-Path $cl)) { throw ('cl.exe not found: {0}' -f $cl) }
 $vcvarsall = Join-Path $installPath 'VC\Auxiliary\Build\vcvarsall.bat'
-if (-not (Test-Path $vcvarsall)) { throw ('vcvarsall.bat not found: {0}' -f $vcvarsall) }
+if (-not (Test-Path $vcvarsall)) {
+    # It comes from the Microsoft.VisualStudio.VC.vcvars vsix, which both
+    # VC.CoreBuildTools and the toolset component require, so if it's missing the
+    # install didn't complete. Show what did land before giving up.
+    Get-ChildItem (Join-Path $installPath 'VC') -Depth 2 -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty FullName | Write-Host
+    throw ('vcvarsall.bat not found: {0}' -f $vcvarsall)
+}
 
 # b2 only auto-detects a toolset that lives in its own generation's Visual Studio
 # directory, and it never passes vcvarsall's -vcvars_ver switch, so anything but
