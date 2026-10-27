@@ -1,0 +1,52 @@
+#
+# Copyright (c) 2019-2025 Ruben Perez Hidalgo (rubenperez038 at gmail dot com)
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+
+# Installs OpenSSL in both address models, where the b2 and CMake builds expect
+# it. See build-msvc.dockerfile.
+
+$ErrorActionPreference = 'Stop'
+
+# This build ships x86, x64 and arm64 in a single archive, already laid out as
+# bin/include/lib, so this is an extract rather than two installer runs into a
+# fixed location. The chocolatey package wraps the Shining Light installers, which
+# can only hold one address model at a time, hence the install/copy/reinstall/
+# copy/uninstall it replaces.
+# 3.5.x is the current LTS. This URL and checksum are the ones published at
+# https://kb.firedaemon.com/support/solutions/articles/4000121705
+$url = 'https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-3.5.9.zip'
+$sha256 = '76DA391395BE029B44794857B9FF380255E02A0960A98314CD3F6A6816D82696'
+$zip = 'C:\tmp\openssl.zip'
+$extracted = 'C:\tmp\openssl'
+
+Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $zip
+$actual = (Get-FileHash $zip -Algorithm SHA256).Hash
+if ($actual -ne $sha256) { throw "openssl.zip checksum mismatch: $actual" }
+
+Expand-Archive -Path $zip -DestinationPath $extracted
+Move-Item (Join-Path $extracted 'x86') 'C:\openssl-32'
+Move-Item (Join-Path $extracted 'x64') 'C:\openssl-64'
+foreach ($dir in 'C:\openssl-32', 'C:\openssl-64') {
+    Copy-Item (Join-Path $extracted 'LICENSE.txt') $dir
+}
+# This drops the arm64 build along with the rest of the archive
+Remove-Item -Recurse -Force $extracted, $zip
+
+# Debug symbols, 98MB of the 124MB that x86 and x64 weigh together
+Get-ChildItem 'C:\openssl-32', 'C:\openssl-64' -Recurse -Filter *.pdb | Remove-Item -Force
+
+# The .lib files are import libraries, so the test binaries load the DLLs at run
+# time. The two address models use different DLL names, so both directories can
+# sit on PATH. Written through the registry rather than with setx, which
+# truncates PATH at 1024 characters.
+$path = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+[Environment]::SetEnvironmentVariable('Path', "C:\openssl-64\bin;C:\openssl-32\bin;$path", 'Machine')
+
+# Also confirms the DLLs next to it load
+foreach ($exe in 'C:\openssl-32\bin\openssl.exe', 'C:\openssl-64\bin\openssl.exe') {
+    & $exe version
+    if ($LASTEXITCODE -ne 0) { throw "$exe did not run" }
+}
