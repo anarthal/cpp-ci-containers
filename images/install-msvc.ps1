@@ -25,22 +25,23 @@ $ErrorActionPreference = 'Stop'
 #   Bootstrapper: the installer to run. aka.ms/vs/18/release doesn't exist;
 #                 VS2026 is published under the "stable" channel instead
 #   Component:    VS component ID of the toolset, pinning its exact version
-#   Dir:          its directory under VC\Tools\MSVC
+#   VcvarsVer:    the version vcvarsall's -vcvars_ver takes, which is also the
+#                 prefix of the toolset's directory under VC\Tools\MSVC
 #   Cl:           the version cl.exe must report
 $VS2022 = 'https://aka.ms/vs/17/release/vs_buildtools.exe'
 $VS2026 = 'https://aka.ms/vs/18/stable/vs_buildtools.exe'
 $toolsets = @{
     # MSVC v141 - VS2017 C++ build tools. There is no versioned component ID for
     # it, but it needs none: 14.16 is the final, and only, v141 toolset.
-    '14.1' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.v141.x86.x64';        Dir = '14.16.*'; Cl = '19.16' }
+    '14.1' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.v141.x86.x64';        VcvarsVer = '14.16'; Cl = '19.16' }
     # MSVC v142 - VS2019 C++ build tools (v14.29-16.11)
-    '14.2' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64'; Dir = '14.29.*'; Cl = '19.29' }
+    '14.2' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64'; VcvarsVer = '14.29'; Cl = '19.29' }
     # MSVC v143 - VS2022 C++ build tools (v14.44-17.14). b2 calls every VS2022
     # toolset 14.3, so there is no "14.4" to install.
-    '14.3' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64'; Dir = '14.44.*'; Cl = '19.44' }
+    '14.3' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64'; VcvarsVer = '14.44'; Cl = '19.44' }
     # MSVC v145 - VS2026 C++ build tools (v14.50-18.0). Only the VS2026 installer
     # offers it; the VS2022 catalog stops at 14.44.
-    '14.5' = @{ Bootstrapper = $VS2026; Component = 'Microsoft.VisualStudio.Component.VC.14.50.18.0.x86.x64'; Dir = '14.50.*'; Cl = '19.50' }
+    '14.5' = @{ Bootstrapper = $VS2026; Component = 'Microsoft.VisualStudio.Component.VC.14.50.18.0.x86.x64'; VcvarsVer = '14.50'; Cl = '19.50' }
 }
 $toolset = $toolsets[$B2Toolset]
 
@@ -72,15 +73,14 @@ if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
 }
 Remove-Item $bootstrapper
 
+# The component ID pins the first two components of the toolset version only; the
+# third moves with Visual Studio servicing updates, so look the directory up
+# instead of hardcoding it.
 $msvcDir = Join-Path $installPath 'VC\Tools\MSVC'
-$dirs = @(Get-ChildItem -Directory -Path $msvcDir | Sort-Object Name)
-Write-Host ('Installed toolsets: {0}' -f ($dirs.Name -join ', '))
-if ($dirs.Count -ne 1) {
-    # Not fatal, but the image is then carrying a toolset nobody asked for
-    Write-Warning 'Expected a single MSVC toolset to be installed'
-}
-$toolsetDir = $dirs | Where-Object Name -Like $toolset.Dir | Select-Object -Last 1
-if (-not $toolsetDir) { throw ('No MSVC toolset matching {0} under {1}' -f $toolset.Dir, $msvcDir) }
+$toolsetDir = Get-ChildItem -Directory -Path $msvcDir |
+    Where-Object Name -Like ('{0}.*' -f $toolset.VcvarsVer) | Sort-Object Name | Select-Object -Last 1
+if (-not $toolsetDir) { throw ('No MSVC toolset matching {0}.* under {1}' -f $toolset.VcvarsVer, $msvcDir) }
+Write-Host ('Installed toolset: {0}' -f $toolsetDir.Name)
 
 $cl = Join-Path $toolsetDir.FullName 'bin\Hostx64\x64\cl.exe'
 if (-not (Test-Path $cl)) { throw ('cl.exe not found: {0}' -f $cl) }
@@ -93,11 +93,8 @@ if (-not (Test-Path $vcvarsall)) { throw ('vcvarsall.bat not found: {0}' -f $vcv
 # vcvarsall wrapper and register it in site-config.jam, which b2 reads from
 # %SystemRoot% on every run, independently of the user-config.jam that CI jobs
 # overwrite. This mirrors what the cppalliance/dronevs images do.
-New-Item -ItemType Directory -Force -Path 'C:\vcvars' | Out-Null
-$wrapper = 'C:\vcvars\v{0}.bat' -f ($B2Toolset -replace '\.', '')
-# -vcvars_ver takes the two-component toolset version, e.g. 14.16
-$vcvarsVer = ($toolsetDir.Name -split '\.')[0, 1] -join '.'
-('@call "{0}" %* -vcvars_ver={1}' -f $vcvarsall, $vcvarsVer) | Set-Content -Path $wrapper -Encoding ascii
+$wrapper = 'C:\vcvars.bat'
+('@call "{0}" %* -vcvars_ver={1}' -f $vcvarsall, $toolset.VcvarsVer) | Set-Content -Path $wrapper -Encoding ascii
 ('using msvc : {0} : "{1}" : <setup>"{2}" ;' -f $B2Toolset, ($cl -replace '\\', '/'), ($wrapper -replace '\\', '/')) |
     Set-Content -Path 'C:\Windows\site-config.jam' -Encoding ascii
 
