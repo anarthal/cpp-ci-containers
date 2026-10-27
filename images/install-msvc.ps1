@@ -18,30 +18,29 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
-# Every toolset is pinned by its component ID, so which build of the installer
-# runs doesn't affect the compiler we get. 14.1 to 14.3 use the VS2022 installer:
-# a VS2026 one would work too, but it registers as a VS "18" instance, and the
-# CMake pipelines ask for the "Visual Studio 17 2022" generator.
-#   Bootstrapper: the installer to run. aka.ms/vs/18/release doesn't exist;
-#                 VS2026 is published under the "stable" channel instead
-#   Component:    VS component ID of the toolset, pinning its exact version
-#   VcvarsVer:    the version vcvarsall's -vcvars_ver takes, which is also the
-#                 prefix of the toolset's directory under VC\Tools\MSVC
-#   Cl:           the version cl.exe must report
-$VS2022 = 'https://aka.ms/vs/17/release/vs_buildtools.exe'
-$VS2026 = 'https://aka.ms/vs/18/stable/vs_buildtools.exe'
+# The VS2026 installer offers every toolset back to v141, so one bootstrapper
+# covers all the images. Each toolset is pinned by its component ID, so which
+# build of the installer runs doesn't affect the compiler we get.
+# Note this makes every image a Visual Studio "18" instance: CMake builds need
+# the "Visual Studio 18 2026" generator.
+#   Component:  VS component ID of the toolset, pinning its exact version
+#   VcvarsVer:  the version vcvarsall's -vcvars_ver takes, which is also the
+#               prefix of the toolset's directory under VC\Tools\MSVC
+#   Cl:         the version cl.exe must report
+# aka.ms/vs/18/release doesn't exist; VS2026 is published under "stable"
+$bootstrapperUrl = 'https://aka.ms/vs/18/stable/vs_buildtools.exe'
 $toolsets = @{
     # MSVC v141 - VS2017 C++ build tools. There is no versioned component ID for
     # it, but it needs none: 14.16 is the final, and only, v141 toolset.
-    '14.1' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.v141.x86.x64';        VcvarsVer = '14.16'; Cl = '19.16' }
+    '14.1' = @{ Component = 'Microsoft.VisualStudio.Component.VC.v141.x86.x64';        VcvarsVer = '14.16'; Cl = '19.16' }
     # MSVC v142 - VS2019 C++ build tools (v14.29-16.11)
-    '14.2' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64'; VcvarsVer = '14.29'; Cl = '19.29' }
+    '14.2' = @{ Component = 'Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64'; VcvarsVer = '14.29'; Cl = '19.29' }
     # MSVC v143 - VS2022 C++ build tools (v14.44-17.14). b2 calls every VS2022
     # toolset 14.3, so there is no "14.4" to install.
-    '14.3' = @{ Bootstrapper = $VS2022; Component = 'Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64'; VcvarsVer = '14.44'; Cl = '19.44' }
-    # MSVC v145 - VS2026 C++ build tools (v14.50-18.0). Only the VS2026 installer
-    # offers it; the VS2022 catalog stops at 14.44.
-    '14.5' = @{ Bootstrapper = $VS2026; Component = 'Microsoft.VisualStudio.Component.VC.14.50.18.0.x86.x64'; VcvarsVer = '14.50'; Cl = '19.50' }
+    '14.3' = @{ Component = 'Microsoft.VisualStudio.Component.VC.14.44.17.14.x86.x64'; VcvarsVer = '14.44'; Cl = '19.44' }
+    # MSVC v145 - VS2026 C++ build tools (v14.50-18.0). This is the toolset that
+    # forces the VS2026 installer: the VS2022 catalog stops at 14.44.
+    '14.5' = @{ Component = 'Microsoft.VisualStudio.Component.VC.14.50.18.0.x86.x64'; VcvarsVer = '14.50'; Cl = '19.50' }
 }
 $toolset = $toolsets[$B2Toolset]
 
@@ -58,7 +57,7 @@ $bootstrapper = 'C:\tmp\vs_buildtools.exe'
 # vcvarsall.bat (VC.CoreBuildTools), MSBuild itself (Microsoft.Component.MSBuild)
 # and the Windows SDK, which holds the Win32 headers and libs and the UCRT.
 Write-Host ('Installing {0} ({1})' -f $toolset.Component, $B2Toolset)
-Invoke-WebRequest -UseBasicParsing -Uri $toolset.Bootstrapper -OutFile $bootstrapper
+Invoke-WebRequest -UseBasicParsing -Uri $bootstrapperUrl -OutFile $bootstrapper
 $proc = Start-Process -FilePath $bootstrapper -Wait -PassThru -NoNewWindow -ArgumentList @(
     '--quiet', '--wait', '--norestart', '--nocache',
     '--installPath', $installPath,
@@ -88,8 +87,8 @@ $vcvarsall = Join-Path $installPath 'VC\Auxiliary\Build\vcvarsall.bat'
 if (-not (Test-Path $vcvarsall)) { throw ('vcvarsall.bat not found: {0}' -f $vcvarsall) }
 
 # b2 only auto-detects a toolset that lives in its own generation's Visual Studio
-# directory, and it never passes vcvarsall's -vcvars_ver switch, so v141 and v142
-# installed under the VS2022 build tools are invisible to it. Pin the toolset in a
+# directory, and it never passes vcvarsall's -vcvars_ver switch, so anything but
+# v145 under the VS2026 build tools is invisible to it. Pin the toolset in a
 # vcvarsall wrapper and register it in site-config.jam, which b2 reads from
 # %SystemRoot% on every run, independently of the user-config.jam that CI jobs
 # overwrite. This mirrors what the cppalliance/dronevs images do.

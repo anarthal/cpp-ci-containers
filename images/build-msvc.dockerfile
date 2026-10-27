@@ -8,7 +8,7 @@
 # An image with a single MSVC toolset, selected with the B2_TOOLSET build arg.
 # The cppalliance/dronevs images now ship every toolset from v141 to v145 in one
 # ~14GB image, which doesn't fit in the CI disk, so we install just what we need:
-# the Visual Studio part of this lands at 3.2GB (14.1) to 4.5GB (14.5).
+# the Visual Studio part of this lands at 2.9GB (14.1) to 4.5GB (14.5).
 # See .github/workflows/docker-windows.yml for the toolsets we build.
 #
 # Based on Windows Server 2025 with .NET Framework, which the VS installer needs.
