@@ -63,6 +63,15 @@ $proc = Start-Process -FilePath $bootstrapper -Wait -PassThru -NoNewWindow -Argu
     '--installPath', $installPath,
     '--add', 'Microsoft.VisualStudio.Component.VC.CoreBuildTools',
     '--add', 'Microsoft.Component.MSBuild',
+    # vcvarsall.bat lives here, together with Microsoft.VCToolsVersion.default.txt.
+    # No component we install pulls it in: VC.CoreBuildTools doesn't, and neither
+    # does any of the versioned toolset components (v141 is the exception, which is
+    # why that was the only image that worked). The alternative is the
+    # VC.Tools.x86.x64 component, but that drags in the current toolset too, ~2GB
+    # for a 14KB file. This is a package rather than a component ID, which the
+    # installer takes but doesn't document; the check further down catches it if
+    # that ever stops being true.
+    '--add', 'Microsoft.VisualCpp.Tools.Core.x86',
     '--add', $toolset.Component,
     '--add', 'Microsoft.VisualStudio.Component.Windows11SDK.26100'
 )
@@ -108,15 +117,21 @@ Write-Host ('Installed toolset: {0}' -f $toolsetDir.Name)
 
 $cl = Join-Path $toolsetDir.FullName 'bin\Hostx64\x64\cl.exe'
 if (-not (Test-Path $cl)) { throw ('cl.exe not found: {0}' -f $cl) }
-$vcvarsall = Join-Path $installPath 'VC\Auxiliary\Build\vcvarsall.bat'
+$auxBuild = Join-Path $installPath 'VC\Auxiliary\Build'
+$vcvarsall = Join-Path $auxBuild 'vcvarsall.bat'
 if (-not (Test-Path $vcvarsall)) {
-    # It comes from the Microsoft.VisualStudio.VC.vcvars vsix, which both
-    # VC.CoreBuildTools and the toolset component require, so if it's missing the
-    # install didn't complete. Show what did land before giving up.
+    # It comes from Microsoft.VisualCpp.Tools.Core.x86, which is --added above.
+    # Show what did land before giving up.
     Get-ChildItem (Join-Path $installPath 'VC') -Depth 2 -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty FullName | Write-Host
     throw ('vcvarsall.bat not found: {0}' -f $vcvarsall)
 }
+
+# That package also brings a default.txt naming the toolset the installer considers
+# current, which isn't the one this image has. MSBuild and CMake read it to pick a
+# compiler, so point it at what's actually installed.
+Set-Content -Path (Join-Path $auxBuild 'Microsoft.VCToolsVersion.default.txt') `
+    -Value $toolsetDir.Name -Encoding ascii
 
 # b2 only auto-detects a toolset that lives in its own generation's Visual Studio
 # directory, and it never passes vcvarsall's -vcvars_ver switch, so anything but
