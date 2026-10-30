@@ -5,17 +5,14 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-# Installs Python, which runs the CI scripts. See ../build-msvc.dockerfile.
-#
-# The embeddable package is a third of the size but ships without pip, so this is
-# the regular installer with the parts a CI image has no use for left out: the
-# test suite, the docs, tkinter and IDLE, the headers and libs for embedding, and
-# the py.exe launcher.
+# Uses the raw installer instead of choco install because it's smaller in size
+# and doesn't require us to download choco
 
 # Load the utilities
 . (Join-Path $PSScriptRoot 'common.ps1')
 
 # Checksum from https://www.python.org/downloads/release/python-3152/
+# Don't install optional components that we don't use
 $version = '3.15.2'
 $installDir = 'C:\python'
 $installer = 'C:\tmp\python.exe'
@@ -33,4 +30,5 @@ Add-MachinePath $installDir
 # requests, used by the examples under example/private
 Invoke-Checked python -m pip install --no-cache-dir --disable-pip-version-check requests
 
+# Smoke test
 Invoke-Checked python --version
