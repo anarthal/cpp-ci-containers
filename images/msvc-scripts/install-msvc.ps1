@@ -5,7 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-# Installs a single MSVC toolset and makes b2 aware of it. See build-msvc.dockerfile.
+# Installs a single MSVC toolset and makes b2 aware of it. See ../build-msvc.dockerfile.
 # Inspired by https://github.com/cppalliance/drone-ci/tree/master/dockers/dronevs2026/windows2025
 
 [CmdletBinding()]

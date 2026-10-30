@@ -5,7 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-# Installs git, CMake and Python, plus the VC runtime. See build-msvc.dockerfile.
+# Installs git, CMake and Python. See ../build-msvc.dockerfile.
 #
 # These used to come from chocolatey, which pulled 15 packages for two of them:
 # three chocolatey extensions, five Windows 7/8.1-era hotfix shims (KB2919355 and

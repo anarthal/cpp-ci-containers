@@ -21,23 +21,21 @@ SHELL ["cmd", "/S", "/C"]
 
 ARG B2_TOOLSET
 
+COPY images/msvc-scripts C:/tmp/msvc-scripts
+
 # The MSVC toolset, plus the b2 registration that exposes it as toolset=msvc-$B2_TOOLSET
-COPY images/install-msvc.ps1 C:/tmp/install-msvc.ps1
-RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/install-msvc.ps1 -B2Toolset %B2_TOOLSET%
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-msvc.ps1 -B2Toolset %B2_TOOLSET%
 
 # git clones the Boost superproject, python runs the CI scripts, cmake is used by
 # the CMake pipelines
-COPY images/install-tools.ps1 C:/tmp/install-tools.ps1
-RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/install-tools.ps1
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-tools.ps1
 
 # The MySQL server the tests run against, and its config
 COPY boost_mysql/win-ci.cnf C:/my.cnf
 COPY boost_mysql/ssl C:/ssl
-COPY images/install-mysql.ps1 C:/tmp/install-mysql.ps1
-RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/install-mysql.ps1
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-mysql.ps1
 
 # OpenSSL, in both address models
-COPY images/install-openssl.ps1 C:/tmp/install-openssl.ps1
-RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/install-openssl.ps1
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-openssl.ps1
 
 ENTRYPOINT ["powershell.exe", "-NoLogo", "-ExecutionPolicy", "Bypass"]

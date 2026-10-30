@@ -6,7 +6,7 @@
 #
 
 # Installs the MySQL server the tests run against, and registers it as a service.
-# See build-msvc.dockerfile.
+# See ../build-msvc.dockerfile.
 
 $ErrorActionPreference = 'Stop'
 

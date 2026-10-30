@@ -6,7 +6,7 @@
 #
 
 # Installs OpenSSL in both address models, where the b2 and CMake builds expect
-# it. See build-msvc.dockerfile.
+# it. See ../build-msvc.dockerfile.
 
 $ErrorActionPreference = 'Stop'
 
