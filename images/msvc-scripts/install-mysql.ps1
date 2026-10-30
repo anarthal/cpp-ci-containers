@@ -5,17 +5,14 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-# Installs the MySQL server the tests run against, and registers it as a service.
-# See ../build-msvc.dockerfile.
+# There is no Windows MySQL container, and we can't mix Linux and Windows containers
+# in most CIs. So we need to install MySQL locally in the Windows machine.
 
 # Load the utilities
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-# Downloaded from the CDN rather than through chocolatey, whose package hardcodes
-# a dev.mysql.com URL: that host is a redirector with bot protection in front of
-# it, and it answers 403 to CI runners. This is the file it redirects to, and the
-# checksum is the one the chocolatey package pins, so the bytes are the same
-# either way. Only the three values below change to move to another version.
+# Use the CDN directly, rather than the recommended URL, because the latter
+# tends to fail with 403 in automated builds
 $version = '8.0.20'
 $url = "https://cdn.mysql.com/archives/mysql-8.0/mysql-$version-winx64.zip"
 $sha256 = 'B9A7592AC170A6C55CE4F20C16E120C789D3D89342EA5681362311E118103A8A'
