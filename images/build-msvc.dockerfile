@@ -34,7 +34,6 @@ RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/inst
 RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-python.ps1
 
 # The MySQL server the tests run against, and its config
-COPY boost_mysql/win-ci.cnf C:/my.cnf
 COPY boost_mysql/ssl C:/ssl
 RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-mysql.ps1
 

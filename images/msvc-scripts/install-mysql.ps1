@@ -20,18 +20,21 @@ $sha256 = 'B9A7592AC170A6C55CE4F20C16E120C789D3D89342EA5681362311E118103A8A'
 $installDir = "C:\mysql-$version-winx64" # archive expands to this name
 $dataDir = 'C:\ProgramData\MySQL\data'
 $serviceName = 'MySQL'
+$sslDir = 'C:/ssl' # the dockerfile copies the certificates here
 
 Expand-Verified -Url $url -Sha256 $sha256 -DestinationPath 'C:\'
 
-# The server reads basedir and datadir from here and its SSL settings from
-# C:\my.cnf; both are in its default search path. Forward slashes are valid in
-# MySQL option files.
+# The server reads this on every start: it's <basedir>\my.ini, which is in its
+# default search path. Forward slashes are valid in MySQL option files.
 $iniPath = Join-Path $installDir 'my.ini'
 @(
     '[mysqld]'
     'basedir={0}' -f ($installDir -replace '\\', '/')
     'datadir={0}' -f ($dataDir -replace '\\', '/')
     'port=3306'
+    "ssl-ca=$sslDir/ca-cert.pem"
+    "ssl-cert=$sslDir/server-cert.pem"
+    "ssl-key=$sslDir/server-key.pem"
 ) | Set-Content -Path $iniPath -Encoding ascii
 
 $mysqld = Join-Path $installDir 'bin\mysqld.exe'
