@@ -25,16 +25,10 @@ ARG B2_TOOLSET
 COPY images/install-msvc.ps1 C:/tmp/install-msvc.ps1
 RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/install-msvc.ps1 -B2Toolset %B2_TOOLSET%
 
-# Chocolatey, for everything else
-RUN powershell -NoProfile -Command \
-    "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
-RUN choco feature enable -n allowGlobalConfirmation
-
 # git clones the Boost superproject, python runs the CI scripts, cmake is used by
 # the CMake pipelines
-RUN choco install --no-progress -y git python
-RUN choco install --no-progress -y cmake.install --installargs '"ADD_CMAKE_TO_PATH=System"'
-RUN pip install requests
+COPY images/install-tools.ps1 C:/tmp/install-tools.ps1
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/install-tools.ps1
 
 # The MySQL server the tests run against, and its config
 COPY boost_mysql/win-ci.cnf C:/my.cnf
