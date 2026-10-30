@@ -24,8 +24,7 @@ $sslDir = 'C:/ssl' # the dockerfile copies the certificates here
 
 Expand-Verified -Url $url -Sha256 $sha256 -DestinationPath 'C:\'
 
-# The server reads this on every start: it's <basedir>\my.ini, which is in its
-# default search path. Forward slashes are valid in MySQL option files.
+# Generate the config file read by mysqld
 $iniPath = Join-Path $installDir 'my.ini'
 @(
     '[mysqld]'
@@ -37,8 +36,11 @@ $iniPath = Join-Path $installDir 'my.ini'
     "ssl-key=$sslDir/server-key.pem"
 ) | Set-Content -Path $iniPath -Encoding ascii
 
-$mysqld = Join-Path $installDir 'bin\mysqld.exe'
+# Create the data dir
 New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
+
+# MySQL initialization
+$mysqld = Join-Path $installDir 'bin\mysqld.exe'
 Invoke-Checked $mysqld "--defaults-file=$iniPath" --initialize-insecure
 Invoke-Checked $mysqld --install $serviceName
 
