@@ -32,6 +32,21 @@ Move-Item (Join-Path $extracted 'x64') 'C:\openssl-64'
 foreach ($dir in 'C:\openssl-32', 'C:\openssl-64') {
     Copy-Item (Join-Path $extracted 'LICENSE.txt') $dir
 }
+
+# The configuration goes where these binaries were compiled to look for it, which
+# is where the vendor's installer would have put it: a directory under Common
+# Files that both address models share. Without it everything that reads
+# openssl.cnf fails with "Can't open ... for reading". The path carries the
+# version number, so ask the binaries for it instead of hardcoding it.
+$opensslDirs = @('C:\openssl-64\bin\openssl.exe', 'C:\openssl-32\bin\openssl.exe') |
+    ForEach-Object { (& $_ version -d) -replace '^OPENSSLDIR:\s*"?(.*?)"?\s*$', '$1' } |
+    Select-Object -Unique
+foreach ($dir in $opensslDirs) {
+    Write-Host ('Installing openssl.cnf to {0}' -f $dir)
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Copy-Item (Join-Path $extracted 'ssl\*') $dir -Recurse -Force
+}
+
 # This drops the arm64 build along with the rest of the archive
 Remove-Item -Recurse -Force $extracted, $zip
 
@@ -45,8 +60,14 @@ Get-ChildItem 'C:\openssl-32', 'C:\openssl-64' -Recurse -Filter *.pdb | Remove-I
 $path = [Environment]::GetEnvironmentVariable('Path', 'Machine')
 [Environment]::SetEnvironmentVariable('Path', "C:\openssl-64\bin;C:\openssl-32\bin;$path", 'Machine')
 
-# Also confirms the DLLs next to it load
+# Confirms the DLLs next to it load, and that the configuration is where the
+# tools look for it: generating a certificate is what the CI does with openssl,
+# and it's the step that reads openssl.cnf.
 foreach ($exe in 'C:\openssl-32\bin\openssl.exe', 'C:\openssl-64\bin\openssl.exe') {
     & $exe version
     if ($LASTEXITCODE -ne 0) { throw "$exe did not run" }
+    & $exe req -x509 -newkey rsa:2048 -nodes -days 1 -subj '/CN=smoke test' `
+        -keyout 'C:\tmp\smoke-key.pem' -out 'C:\tmp\smoke-cert.pem'
+    if ($LASTEXITCODE -ne 0) { throw "$exe could not generate a certificate" }
 }
+Remove-Item -Force 'C:\tmp\smoke-key.pem', 'C:\tmp\smoke-cert.pem'
