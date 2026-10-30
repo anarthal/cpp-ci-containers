@@ -111,10 +111,8 @@ Set-Content -Path (Join-Path $installPath 'VC\Auxiliary\Build\Microsoft.VCToolsV
 
 # b2 only auto-detects a toolset that lives in its own generation's Visual Studio
 # directory, and it never passes vcvarsall's -vcvars_ver switch, so anything but
-# v145 under the VS2026 build tools is invisible to it. Pin the toolset in a
-# vcvarsall wrapper and register it in site-config.jam, which b2 reads from
-# %SystemRoot% on every run, independently of the user-config.jam that CI jobs
-# overwrite. This mirrors what the cppalliance/dronevs images do.
+# v145 under the VS2026 build tools is invisible to it.
+# Tell b2 about how to set up the compiler (via a wrapper script)
 $wrapper = 'C:\vcvars.bat'
 ('@call "{0}" %* -vcvars_ver={1}' -f $vcvarsall, $vcvarsVer) | Set-Content -Path $wrapper -Encoding ascii
 ('using msvc : {0} : "{1}" : <setup>"{2}" ;' -f $B2Toolset, ($cl -replace '\\', '/'), ($wrapper -replace '\\', '/')) |
@@ -125,7 +123,7 @@ Get-Content 'C:\Windows\site-config.jam' | Write-Host
 Write-Host ('=== {0} ===' -f $wrapper)
 Get-Content $wrapper | Write-Host
 
-# Check that the wrapper really selects the toolset we think it does
+# Smoke test
 $clOutput = (& cmd /c "call ""$wrapper"" amd64 > nul 2>&1 && cl 2>&1") -join "`n"
 if ($clOutput -notmatch [regex]::Escape('Version ' + $toolset.Cl)) {
     throw ("Expected cl.exe to report version {0}, got:`n{1}" -f $toolset.Cl, $clOutput)
