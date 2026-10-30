@@ -24,6 +24,9 @@ $sslDir = 'C:/ssl' # the dockerfile copies the certificates here
 
 Expand-Verified -Url $url -Sha256 $sha256 -DestinationPath 'C:\'
 
+# Allow calling the executables without qualification
+Add-MachinePath (Join-Path $installDir 'bin')
+
 # Generate the config file read by mysqld
 $iniPath = Join-Path $installDir 'my.ini'
 @(
@@ -40,13 +43,10 @@ $iniPath = Join-Path $installDir 'my.ini'
 New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 
 # MySQL initialization
-$mysqld = Join-Path $installDir 'bin\mysqld.exe'
-Invoke-Checked $mysqld "--defaults-file=$iniPath" --initialize-insecure
-Invoke-Checked $mysqld --install $serviceName
+Invoke-Checked mysqld "--defaults-file=$iniPath" --initialize-insecure
+Invoke-Checked mysqld --install $serviceName
 
 # Smoke test
 Start-Service $serviceName
-Invoke-Checked (Join-Path $installDir 'bin\mysql.exe') -u root --batch --skip-column-names -e 'SELECT VERSION()'
+Invoke-Checked mysql -u root --batch --skip-column-names -e 'SELECT VERSION()'
 Stop-Service $serviceName
-
-Add-MachinePath (Join-Path $installDir 'bin')
