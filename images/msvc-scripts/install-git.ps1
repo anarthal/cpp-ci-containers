@@ -5,11 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-# Installs git, used to clone the Boost superproject. See ../build-msvc.dockerfile.
-#
-# MinGit is the distribution git-for-windows publishes for embedding in other
-# tools: the same git, without the bash and perl environment around it. All the CI
-# does is clone and submodule update.
+# Uses MinGit because it's more lightweight (no GUI).
 
 # Load the utilities
 . (Join-Path $PSScriptRoot 'common.ps1')
@@ -20,4 +16,5 @@ Expand-Verified -DestinationPath 'C:\git' `
     -Sha256 'E3BF78351FE777FBA47DDEE5950082F8A98BB0F02604FDC7BA3EE2CB68FFA877'
 Add-MachinePath 'C:\git\cmd'
 
+# Smoke test
 Invoke-Checked git --version
