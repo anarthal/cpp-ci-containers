@@ -8,6 +8,7 @@
 # Installs the MySQL server the tests run against, and registers it as a service.
 # See ../build-msvc.dockerfile.
 
+# Load the utilities
 . (Join-Path $PSScriptRoot 'common.ps1')
 
 # Downloaded from the CDN rather than through chocolatey, whose package hardcodes
