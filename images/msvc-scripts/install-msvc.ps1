@@ -16,7 +16,8 @@ param (
     [string] $B2Toolset
 )
 
-$ErrorActionPreference = 'Stop'
+# Load the utilities
+. (Join-Path $PSScriptRoot 'common.ps1')
 
 # The VS2026 installer offers every toolset back to v141, so one bootstrapper
 # covers all the images. Each toolset is pinned by its component ID, so which
@@ -73,19 +74,18 @@ $bootstrapper = 'C:\tmp\vs_buildtools.exe'
 # (Microsoft.Component.MSBuild) and the Windows SDK, which holds the Win32 headers
 # and libs and the UCRT.
 Write-Host ('Installing {0}: {1}' -f $B2Toolset, ($toolset.Components -join ', '))
+# Not Get-Verified, unlike every other download here: the bootstrapper behind that
+# link is rebuilt for each VS servicing release, so there is no stable checksum to
+# pin. What it installs is pinned by the component IDs instead.
 Invoke-WebRequest -UseBasicParsing -Uri $bootstrapperUrl -OutFile $bootstrapper
 # --add silently ignores anything that isn't a workload, component or component
 # group - no error, no log line - so every ID here has to be one of those.
 $components = @('Microsoft.VisualStudio.Component.VC.CoreBuildTools',
                 'Microsoft.Component.MSBuild',
                 'Microsoft.VisualStudio.Component.Windows11SDK.26100') + $toolset.Components
-$proc = Start-Process -FilePath $bootstrapper -Wait -PassThru -NoNewWindow -ArgumentList (@(
+Invoke-Installer -Path $bootstrapper -AllowedExitCodes 0, 3010 -Arguments (@(
     '--quiet', '--wait', '--norestart', '--nocache',
     '--installPath', $installPath) + ($components | ForEach-Object { '--add'; $_ }))
-Write-Host ('vs_buildtools.exe exited with {0}' -f $proc.ExitCode)
-if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
-    throw ('vs_buildtools.exe failed with exit code {0}' -f $proc.ExitCode)
-}
 # --quiet sends everything to the logs, so individual components can fail without
 # the exit code saying so. This is the check the dotnet/framework images use.
 $errorLogs = @(Get-ChildItem $env:TEMP -Filter 'dd_setup_*_errors.log' | Where-Object Length -gt 0)
