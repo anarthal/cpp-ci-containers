@@ -36,10 +36,10 @@ Copy-Item (Join-Path $extracted 'LICENSE.txt') $roots['32']
 New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 Copy-Item (Join-Path $extracted 'ssl\*') $configDir -Recurse -Force # config
 
-# This drops the arm64 build along with the rest of the archive
+# Remove the arm64 build along with the rest of the archive
 Remove-Item -Recurse -Force $extracted
 
-# Debug symbols, 98MB of the 124MB that x86 and x64 weigh together
+# Remove debug symbols, which are heavyweight
 Get-ChildItem $roots.Values -Recurse -Filter *.pdb | Remove-Item -Force
 
 # DLLs are under bin. Add it to path so the loader finds them
