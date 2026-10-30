@@ -116,7 +116,7 @@ Set-Content -Path (Join-Path $installPath 'VC\Auxiliary\Build\Microsoft.VCToolsV
 $wrapper = 'C:\vcvars.bat'
 ('@call "{0}" %* -vcvars_ver={1}' -f $vcvarsall, $vcvarsVer) | Set-Content -Path $wrapper -Encoding ascii
 ('using msvc : {0} : "{1}" : <setup>"{2}" ;' -f $B2Toolset, ($cl -replace '\\', '/'), ($wrapper -replace '\\', '/')) |
-    Set-Content -Path 'C:\Windows\site-config.jam' -Encoding ascii
+    Add-Content -Path 'C:\Windows\site-config.jam' -Encoding ascii
 
 Write-Host '=== C:\Windows\site-config.jam ==='
 Get-Content 'C:\Windows\site-config.jam' | Write-Host
