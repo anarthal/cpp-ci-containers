@@ -10,7 +10,7 @@
 
 # This zip ships x86, x64 and arm64 in a single archive, already laid out as
 # bin/include/lib. It allows installing both architectures in a simple way,
-# as opposed to the Chocolatey package or the Fire Daemon installer.
+# as opposed to the Chocolatey package or the FireDaemon installer.
 # 3.5.x is the current LTS. This URL and checksum are the ones published at
 # https://kb.firedaemon.com/support/solutions/articles/4000121705
 $version = '3.5.9'
@@ -40,7 +40,7 @@ Copy-Item (Join-Path $extracted 'ssl\*') $configDir -Recurse -Force # config
 Remove-Item -Recurse -Force $extracted
 
 # Remove debug symbols, which are heavyweight
-Get-ChildItem $roots.Values -Recurse -Filter *.pdb | Remove-Item -Force
+Get-ChildItem @($roots.Values) -Recurse -Filter *.pdb | Remove-Item -Force
 
 # DLLs are under bin. Add it to path so the loader finds them
 foreach ($arch in '32', '64') { Add-MachinePath (Join-Path $roots[$arch] 'bin') }
