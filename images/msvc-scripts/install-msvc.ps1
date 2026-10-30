@@ -163,3 +163,11 @@ if ($clOutput -notmatch [regex]::Escape('Version ' + $toolset.Cl)) {
     throw ("Expected cl.exe to report version {0}, got:`n{1}" -f $toolset.Cl, $clOutput)
 }
 Write-Host ('=== cl.exe ===' + "`n" + $clOutput)
+
+# Note nothing installs a VC runtime system-wide, and nothing needs one: every
+# bin\Host*\<target> directory of the toolset carries msvcp140.dll, msvcp140_1.dll,
+# msvcp140_2.dll and vcruntime140.dll next to cl.exe, in the matching address
+# model, and vcvarsall puts that directory on PATH. Anything run from a developer
+# environment - b2's tests, and ctest when the CMake jobs are launched the same
+# way - finds the runtime there. chocolatey used to install one as a dependency of
+# its python package, which is why this was never noticed before.

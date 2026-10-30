@@ -27,8 +27,11 @@ COPY images/msvc-scripts C:/tmp/msvc-scripts
 RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-msvc.ps1 -B2Toolset %B2_TOOLSET%
 
 # git clones the Boost superproject, python runs the CI scripts, cmake is used by
-# the CMake pipelines
-RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-tools.ps1
+# the CMake pipelines. These used to come from chocolatey, which pulled in 15
+# packages for the three of them, five of those Windows 7/8.1-era hotfix shims.
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-git.ps1
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-cmake.ps1
+RUN powershell -NoProfile -ExecutionPolicy Bypass -File C:/tmp/msvc-scripts/install-python.ps1
 
 # The MySQL server the tests run against, and its config
 COPY boost_mysql/win-ci.cnf C:/my.cnf
