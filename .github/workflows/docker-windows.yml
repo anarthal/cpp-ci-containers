@@ -63,7 +63,7 @@ jobs:
         shell: bash
         env:
           IMAGE: ghcr.io/anarthal/cpp-ci-containers/${{ matrix.name }}
-          VERSION: 2
+          VERSION: 3
         run: |
           set -e
           docker build \
