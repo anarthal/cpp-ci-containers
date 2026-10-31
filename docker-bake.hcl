@@ -174,14 +174,17 @@ target "build-ubuntu24" {
 }
 
 
-target "build-ubuntu25" {
+target "build-ubuntu26" {
     matrix = {
         "tgt" = [
-            { "name": "build-gcc15",   "version": 1 },
+            { "name": "build-gcc15",   "version": 2 },
+            { "name": "build-gcc16",   "version": 1 },
+            { "name": "build-clang21", "version": 1 },
+            { "name": "build-clang22", "version": 1 },
         ]
     }
     name = tgt.name
-    dockerfile = "images/build-ubuntu25.dockerfile"
+    dockerfile = "images/build-ubuntu26.dockerfile"
     target = tgt.name
     tags = [
         "${tag_prefix}/${tgt.name}:latest",
@@ -228,6 +231,7 @@ group "linux" {
         "build-ubuntu20",
         "build-ubuntu22",
         "build-ubuntu24",
+        "build-ubuntu26",
         "linux-others",
     ]
 }
